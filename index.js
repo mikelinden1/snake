@@ -51,9 +51,11 @@ io.on('connection', function(socket) {
   
   socket.on('food added', function(food) {
 	  // add the new food
-		foodOnBoard.push(food);
-		
-		socket.broadcast.emit('new food', food);
+	  if (foodOnBoard.length < 8) {
+			foodOnBoard.push(food);
+			
+			socket.broadcast.emit('new food', food);
+		}
   });
   
   socket.on('new snake', function(snake) {

@@ -80,8 +80,10 @@ $(function() {
 		});
 		
 		socket.on('new food', function(food) {
-			colorCell(food.x, food.y, "food");
-			foodOnBoard.push(food);
+			if (foodOnBoard.length < 8) {
+				colorCell(food.x, food.y, "food");
+				foodOnBoard.push(food);
+			}
 		});
 		
 		var removeSnake = function(snakeID) {
