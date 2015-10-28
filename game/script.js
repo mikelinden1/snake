@@ -15,9 +15,7 @@ $(function() {
 		thisRow.appendTo("#board");
 		
 		for (var c = 0; c < columns; c++) {
-			
 			$("<DIV />").addClass("cell").appendTo(thisRow);
-			
 		}
 		
 	}
@@ -25,41 +23,12 @@ $(function() {
 	var foodOnBoard = [];
 	var initSnakeLength = 3;
 	var snake = [];
-	var direction = newRandomNumber(0, 3);
+	var direction = 0;
 	var nextDirection = direction;
 	var score = 0;
 	var myInfo = {};
 
 	var gameLogic = function() {
-		
-		var addTail = function(lastSegment) {
-			var newSegmentX = lastSegment.x;
-			var newSegmentY = lastSegment.y;
-			var newSegment = { x: newSegmentX, y: newSegmentY };
-
-			switch(direction) {
-				case 0:
-					//up
-					newSegment.y += 1;
-					break;
-				case 1:
-					//right
-					newSegment.x -= 1;
-					break;
-				case 2:
-					//down
-					newSegment.y -= 1;
-					break;
-				case 3:
-					//left
-					newSegment.x += 1;
-					break;
-			}
-			
-			snake.push(newSegment);
-			
-			return newSegment;
-		};
 		
 		var spawnFood = function(numOfPieces) {
 
@@ -84,12 +53,6 @@ $(function() {
 			}
 		};
 		
-		var placeFood = function() {
-			for (var i = 0; i < foodOnBoard.length; i++) {
-				colorCell(foodOnBoard[i].x, foodOnBoard[i].y, "food");
-			}
-		};
-		
 		var foodEaten = function(food) {
 			unColorCell(food.x, food.y, "food"); //remove the food
 													
@@ -101,15 +64,16 @@ $(function() {
 				}
 			}
 			
-	//		socket.emit('food eaten', food);
 		};
 		
-		socket.emit('ask for food', null);
+		socket.emit('ask for food');
 		socket.on('food delivery', function(food) {
 			foodOnBoard = food;
 			
 			if (foodOnBoard.length) {
-				placeFood();
+				for (var i = 0; i < foodOnBoard.length; i++) {
+					colorCell(foodOnBoard[i].x, foodOnBoard[i].y, "food");
+				}
 			} else {
 				spawnFood(5);
 			}
@@ -128,15 +92,15 @@ $(function() {
 			$(".score").text(score);
 		};
 		
-		var moveSnake = function() {
-			if (direction !== nextDirection) {
+		var moveSnake = function() { //snake animation loop
+			if (direction !== nextDirection) { // look for a change in direction and apply it if necessary
 				direction = nextDirection;
 			}
 			
+			// copy the head of the snake
 			var headOfSnake = snake[0];
 			var headOfSnakeX = headOfSnake.x;
 			var headOfSnakeY = headOfSnake.y;
-			
 			var newHeadOfSnake = { x: headOfSnakeX, y: headOfSnakeY };
 			
 			var oldTailOfSnake = snake[snake.length - 1];
@@ -177,19 +141,15 @@ $(function() {
 				}
 			}
 			
-			var snakeNoHead = snake.slice(0);
-			snakeNoHead.unshift(0); //force a copy instead of a reference 
+			// check if my snake hit another snake or myself
+			var canibal = $(".row").eq(newHeadOfSnake.y).find(".cell").eq(newHeadOfSnake.x).hasClass("snake");
 			
-			//var ateMyself = checkCollison(newHeadOfSnake, snakeNoHead); //check if the snake hit itself
-			
-			var ateMyself = $(".row").eq(newHeadOfSnake.y).find(".cell").eq(newHeadOfSnake.x).hasClass("snake");
-			
-			if (ateMyself) {
+			if (canibal) {
 				gameOver = true;
 			}
 			
 			if (gameOver) {
-				socket.emit('snake died', null);
+				socket.emit('snake died');
 
 				var highScore = getCookie("highScore");
 
@@ -204,7 +164,7 @@ $(function() {
 					$("#gameOverPop .highScore").hide();
 				}
 				
-				setTimeout(function() { removeSnake(myInfo.id); }, 500);
+// 				setTimeout(function() { removeSnake(myInfo.id); }, 500);
 				
 				$("#gameOverPop").show();
 
@@ -214,15 +174,14 @@ $(function() {
 			colorCell(newHeadOfSnake.x, newHeadOfSnake.y, "snake"); // add the head to the DOM
 			setSnakeID(newHeadOfSnake.x, newHeadOfSnake.y, myInfo.id);
 		
-			snake.unshift(newHeadOfSnake); // add the new head to the snake object
+			snake.unshift(newHeadOfSnake); // add the new head to the front of the snake array
 		
 			var ateFood = checkCollison(newHeadOfSnake, foodOnBoard); // check if the snake hit food
 			
 			if (ateFood) {
+				foodEaten(newHeadOfSnake); // remove the food and emit to socket
 				
-				foodEaten(newHeadOfSnake);
-				
-				spawnFood(1); // add a new piece of food
+				spawnFood(1); // add a new piece of food and emit to socket
 				
 				score++; // increment the score
 				
@@ -230,7 +189,7 @@ $(function() {
 			} else {
 				// if they didn't eat food remove the tail to keep the snake the same length. If they did eat food keep the tail so the snake grows by one segment
 				
-				unColorCell(oldTailOfSnake.x, oldTailOfSnake.y, "snake");
+				unColorCell(oldTailOfSnake.x, oldTailOfSnake.y, "snake"); // remove the old snake tail from the dom
 				setSnakeID(oldTailOfSnake.x, oldTailOfSnake.y, null);
 				snake.pop(); 
 			}		
@@ -280,15 +239,20 @@ $(function() {
 		});
 		
 		var startNewGame = function() {
+			// remove the old snake if necessary
+			removeSnake(myInfo.id);
 			$(".cell").removeClass("snake");
-			
 			snake = [];
 
+			// reset gameover and score
 			gameOver = false;
 			score = 0;
-			
 			updateScore();
 			
+			// pick a random direction
+			direction = newRandomNumber(0, 3);
+			
+			// pick a random coordinate to start from
 			var snakeStartingPointX = newRandomNumber(10, columns-10);
 			var snakeStartingPointY = newRandomNumber(10, rows-10);
 			
@@ -296,7 +260,31 @@ $(function() {
 			
 			for (var s = 0; s < initSnakeLength; s++) {
 				
-				var newSegment = addTail(lastSegment);
+				var newSegmentX = lastSegment.x;
+				var newSegmentY = lastSegment.y;
+				var newSegment = { x: newSegmentX, y: newSegmentY };
+	
+				switch(direction) {
+					case 0:
+						//up
+						newSegment.y += 1;
+						break;
+					case 1:
+						//right
+						newSegment.x -= 1;
+						break;
+					case 2:
+						//down
+						newSegment.y -= 1;
+						break;
+					case 3:
+						//left
+						newSegment.x += 1;
+						break;
+				}
+				
+				snake.push(newSegment);
+				
 				setSnakeID(newSegment.x, newSegment.y, myInfo.id);
 				colorCell(newSegment.x, newSegment.y, "snake");
 				
@@ -305,9 +293,9 @@ $(function() {
 				lastSegment = { x: newSegmentX, y: newSegmentY };
 			}
 			
-			socket.emit('new snake', snake);
+			socket.emit('new snake', snake); // tell everyone else about my new snake
 			
-			moveSnake();
+			moveSnake(); // start the animation loop
 		}
 				
 		$("#joinGameForm").submit(function() {
@@ -336,6 +324,7 @@ $(function() {
 			startNewGame();
 		});
 
+		// other snake socket listeners
 		socket.on('new snake ID', function(snakeID) {
 	    myInfo.id = snakeID;
 	  });
@@ -374,6 +363,7 @@ $(function() {
 	  socket.on('snake died', function(snakeID) {
 		  removeSnake(snakeID);
 		});
+		
 	}();
 	
 	
