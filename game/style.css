@@ -9,43 +9,60 @@
 	text-transform: uppercase;
 	margin:0;
 }
-#scoreBoard {
+#myScore {
 	position: absolute;
-	top:40px;
+	top:50px;
 	left:50%;
-	margin-left:-250px;
+	margin-left:-370px;
 	
 	font-size:20px;
+}
+#Container {
+	width:744px;
+	height:504px;
+	
+	position: absolute;
+	top:75px;
+	left:50%;
+	margin-left:-372px;
 }
 #board {
 	width:500px;
 	height:500px;
 	
-	position: absolute;
-	top: 60px;
-	left: 50%;
-	
-	margin-left:-252px;
-	
-	z-index: 1;
+	float:left;
 	
 	border:2px solid #757914;
 }
-/*
-.row:first-child .cell {
-	border-top:2px solid #757914;
+#scoreBoard {
+	float:right;
+	background-color:#004475;
+	
+	width:200px;
+	height:464px;
+	
+	padding:20px;
+	
+	color:#fff;
 }
-.row:last-child .cell {
-	border-bottom:2px solid #757914;
+#scoreBoard h1 {
+	margin:0 0 10px 0;
+	text-align: center;
+	color:#fff;
 }
-.cell:first-child {
-	border-left:2px solid #757914;
+#scoreBoard .noPlayers {
+	font-size:22px;
+	color:#0574c3;
+	text-align: center;
 }
-.cell:last-child {
-	border-right:2px solid #757914;
+#scoreBoard .sbScore {
+	font-size:22px;
+	color:#0574c3;
 }
-*/
-
+#scoreBoard .sbScore:first-child {
+	color:#0096ff;
+	font-size:24px;
+}
 .row {
 	width:auto;
 	height:10px;
@@ -95,7 +112,7 @@
 	
 	text-align: center;
 	
-	margin-left:-125px;
+	margin-left:-245px;
 	
 	background:#fff;
 	

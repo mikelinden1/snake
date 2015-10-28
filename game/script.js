@@ -37,7 +37,7 @@ $(function() {
 				
 				var food = { x: newRandomNumber(0, columns - 1), y: newRandomNumber(0, rows - 1) };
 				
-				var badPlace = checkCollison(food, snake) && checkCollison(food, foodOnBoard);
+				var badPlace = checkCollison(food, foodOnBoard) && !$(".row").eq(food.y).find(".cell").eq(food.x).hasClass("snake");
 				
 				if (!badPlace) {
 					colorCell(food.x, food.y, "food");
@@ -56,7 +56,7 @@ $(function() {
 		
 		var foodEaten = function(food) {
 			unColorCell(food.x, food.y, "food"); //remove the food
-													
+
 			// remove food from food object
 			for (var i = 0; i < foodOnBoard.length; i++) {
 				if (foodOnBoard[i].x === food.x && foodOnBoard[i].y === food.y) {
@@ -67,16 +67,14 @@ $(function() {
 			
 		};
 		
-	//	socket.emit('ask for food');
 		socket.on('food delivery', function(food) {
 			foodOnBoard = food;
-			console.log("food delivery",food);
+
 			if (foodOnBoard.length) {
 				for (var i = 0; i < foodOnBoard.length; i++) {
 					colorCell(foodOnBoard[i].x, foodOnBoard[i].y, "food");
 				}
 			} else {
-				console.log("spawn food (5)");
 				spawnFood(foodPieces);
 			}
 		});
@@ -243,7 +241,7 @@ $(function() {
 		var startNewGame = function() {
 			// remove the old snake if necessary
 			removeSnake(myInfo.id);
-			$(".cell").removeClass("snake");
+			$(".cell").removeClass("deadSnake");
 			snake = [];
 
 			// reset gameover and score
@@ -364,6 +362,23 @@ $(function() {
 	  
 	  socket.on('snake died', function(snakeID) {
 		  removeSnake(snakeID);
+		});
+	
+		socket.on('update scoreboard', function(scores) {
+			scores.sort(function(a, b){
+			   return b.score - a.score;
+			});
+			
+			if (scores.length) {
+				$(".noPlayers").hide();
+			} else {
+				$(".noPlayers").show();
+			}
+			
+			$("#scoreBoard .sbScore").remove();
+			for (var i = 0; i < scores.length; i++) {
+				$("<li />").text(scores[i].playerName + " - " + scores[i].score).addClass("sbScore").appendTo("#scoreBoard #scorers");
+			}
 		});
 		
 	}();
