@@ -28,12 +28,11 @@ io.on('connection', function(socket) {
   	
   socket.on('disconnect', function() {    
     delete players[socket.id];
-		console.log("lost player", socket.id);
+
 		numPlayers--;
   });
   
   socket.on('new player', function(playerName) {
-  	console.log('New Player: ' + playerName);
   	numPlayers++;
   	  	
 		players[socket.id].playerName = playerName;
@@ -81,5 +80,5 @@ io.on('connection', function(socket) {
 });
 
 http.listen(app.get('port'), function() {
-  console.log('listening on *:3000');
+  console.log('listening on *:' + app.get('port'));
 });
