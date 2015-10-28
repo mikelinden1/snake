@@ -74,6 +74,13 @@
 .cell.otherSnake {
 	background-color:rgba(117, 121, 20, 0.7);
 }
+.cell.deadSnake {
+	border:1px solid #c9e238;
+	width:8px;
+	height:8px;
+	
+	background-color:rgb(187, 116, 3);
+}
 
 .pop {
 	position:fixed;
