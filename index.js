@@ -53,18 +53,6 @@ io.on('connection', function(socket) {
 		socket.broadcast.emit('new food', food);
   });
   
-/*
-  socket.on('food eaten', function(food) {
-	  // remove the food if it's eaten
-		for (var i = 0; i < foodOnBoard.length; i++) {
-			if (foodOnBoard[i].x === food.x && foodOnBoard[i].y === food.y) {
-				foodOnBoard.splice(i, 1)
-				break;
-			}
-		}
-  });
-*/
-  
   socket.on('new snake', function(snake) {
 	  var snakeInfo = {
 		  snakeID: socket.id,
@@ -80,9 +68,7 @@ io.on('connection', function(socket) {
 		if (snakeInfo.ate) {
 			players[socket.id].score++;
 		}
-		
-		console.log("snake moved", snakeInfo);
-		
+				
     socket.broadcast.emit('snake moved', snakeInfo);
 	});
 	
