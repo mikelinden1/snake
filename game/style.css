@@ -18,8 +18,8 @@
 	font-size:20px;
 }
 #board {
-	width:504px;
-	height:504px;
+	width:500px;
+	height:500px;
 	
 	position: absolute;
 	top: 60px;
@@ -28,22 +28,27 @@
 	margin-left:-252px;
 	
 	z-index: 1;
+	
+	border:2px solid #757914;
 }
+/*
 .row:first-child .cell {
 	border-top:2px solid #757914;
 }
 .row:last-child .cell {
 	border-bottom:2px solid #757914;
 }
-.row {
-	width:auto;
-	height:10px;
-}
 .cell:first-child {
 	border-left:2px solid #757914;
 }
 .cell:last-child {
 	border-right:2px solid #757914;
+}
+*/
+
+.row {
+	width:auto;
+	height:10px;
 }
 
 .cell {
@@ -53,6 +58,8 @@
 	background-color:#c9e238;
 	
 	display:inline-block;
+	
+	vertical-align: top;
 }
 .cell.food {
 	background-image:url(food.png);

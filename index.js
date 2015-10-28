@@ -23,7 +23,11 @@ io.on('connection', function(socket) {
 	};
 	  	
 	players[socket.id] = newPlayer;
-	  	
+	
+	if (io.sockets.connected[socket.id]) {
+	   io.sockets.connected[socket.id].emit('food delivery', foodOnBoard);
+	}
+	
   socket.on('disconnect', function() {    
     delete players[socket.id];
 
@@ -39,11 +43,13 @@ io.on('connection', function(socket) {
   });
   
   
+/*
   // food events
   socket.on('ask for food', function() {
 	  // return the food stored on the server
-    socket.emit('food delivery', foodOnBoard);
+    
   });
+*/
   
   socket.on('food added', function(food) {
 	  // add the new food

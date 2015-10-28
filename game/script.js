@@ -1,3 +1,4 @@
+'use strict'
 var socket = io();
 
 $(function() {
@@ -10,12 +11,12 @@ $(function() {
 	
 	for (var r = 0; r < rows; r++) {
 		
-		var thisRow = $("<DIV />").addClass("row");
+		var thisRow = $("<DIV />").addClass("row").attr("row",r);
 		
 		thisRow.appendTo("#board");
 		
 		for (var c = 0; c < columns; c++) {
-			$("<DIV />").addClass("cell").appendTo(thisRow);
+			$("<DIV />").addClass("cell").appendTo(thisRow).attr("row",c);
 		}
 		
 	}
@@ -23,15 +24,15 @@ $(function() {
 	var foodOnBoard = [];
 	var initSnakeLength = 3;
 	var snake = [];
-	var direction = 0;
-	var nextDirection = direction;
+	var direction = null;
+	var nextDirection = null;
 	var score = 0;
 	var myInfo = {};
 
 	var gameLogic = function() {
 		
 		var spawnFood = function(numOfPieces) {
-
+			console.log("food request (" + numOfPieces + ")");
 			var newFood = function() {
 				
 				var food = { x: newRandomNumber(0, columns - 1), y: newRandomNumber(0, rows - 1) };
@@ -41,6 +42,8 @@ $(function() {
 				if (!badPlace) {
 					colorCell(food.x, food.y, "food");
 					foodOnBoard.push(food);
+					
+					console.log("new food", food);
 					
 					socket.emit('food added', food);
 				} else {
@@ -66,15 +69,16 @@ $(function() {
 			
 		};
 		
-		socket.emit('ask for food');
+	//	socket.emit('ask for food');
 		socket.on('food delivery', function(food) {
 			foodOnBoard = food;
-			
+			console.log("food delivery",food);
 			if (foodOnBoard.length) {
 				for (var i = 0; i < foodOnBoard.length; i++) {
 					colorCell(foodOnBoard[i].x, foodOnBoard[i].y, "food");
 				}
 			} else {
+				console.log("spawn food (5)");
 				spawnFood(5);
 			}
 		});
@@ -141,10 +145,10 @@ $(function() {
 				}
 			}
 			
-			// check if my snake hit another snake or myself
-			var canibal = $(".row").eq(newHeadOfSnake.y).find(".cell").eq(newHeadOfSnake.x).hasClass("snake");
+			// check if my snake hit another snake or itself
+			var cannibal = $(".row").eq(newHeadOfSnake.y).find(".cell").eq(newHeadOfSnake.x).hasClass("snake");
 			
-			if (canibal) {
+			if (cannibal) {
 				gameOver = true;
 			}
 			
@@ -250,21 +254,21 @@ $(function() {
 			updateScore();
 			
 			// pick a random direction
-			direction = newRandomNumber(0, 3);
+			nextDirection = newRandomNumber(0, 3);
 			
 			// pick a random coordinate to start from
 			var snakeStartingPointX = newRandomNumber(10, columns-10);
 			var snakeStartingPointY = newRandomNumber(10, rows-10);
 			
 			var lastSegment = {x: snakeStartingPointX, y: snakeStartingPointY};
-			
+						
 			for (var s = 0; s < initSnakeLength; s++) {
 				
 				var newSegmentX = lastSegment.x;
 				var newSegmentY = lastSegment.y;
 				var newSegment = { x: newSegmentX, y: newSegmentY };
 	
-				switch(direction) {
+				switch(nextDirection) {
 					case 0:
 						//up
 						newSegment.y += 1;
@@ -287,7 +291,7 @@ $(function() {
 				
 				setSnakeID(newSegment.x, newSegment.y, myInfo.id);
 				colorCell(newSegment.x, newSegment.y, "snake");
-				
+
 				newSegmentX = newSegment.x;
 				newSegmentY = newSegment.y;
 				lastSegment = { x: newSegmentX, y: newSegmentY };
