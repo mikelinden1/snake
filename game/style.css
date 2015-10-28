@@ -100,6 +100,23 @@
 	background-color:rgba(117, 121, 20, 0.7);
 }
 
+#Messages {
+	width:744px;
+	height:auto;
+	
+	position: absolute;
+	top:585px;
+	left:50%;
+	margin-left:-372px;
+	
+	font-size:20px;
+	font-weight: normal;	
+	text-align: center;
+}
+#Messages .message .playerName {
+	color:#0096ff;
+}
+
 .pop {
 	position:fixed;
 	top:210px;

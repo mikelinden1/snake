@@ -377,8 +377,16 @@ $(function() {
 			
 			$("#scoreBoard .sbScore").remove();
 			for (var i = 0; i < scores.length; i++) {
-				$("<li />").text(scores[i].playerName + " - " + scores[i].score).addClass("sbScore").appendTo("#scoreBoard #scorers");
+				$("<li />").text(scores[i].playerName + " - " + scores[i].score).addClass("sbScore").appendTo("#scoreBoard #Scorers");
 			}
+		});
+		
+		socket.on('new message', function(message) {
+			var newMessage = $("<DIV />").html(message).addClass("message").prependTo("#Messages").hide().fadeIn('slow');
+			
+			setTimeout(function() {
+				newMessage.fadeOut('slow', function() { $(this).remove(); });
+			},3000);
 		});
 		
 	}();

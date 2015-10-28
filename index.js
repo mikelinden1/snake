@@ -21,7 +21,11 @@ io.on('connection', function(socket) {
 		io.sockets.connected[socket.id].emit('food delivery', foodOnBoard);
 	}
 	
-  socket.on('disconnect', function() {    
+  socket.on('disconnect', function() { 
+	  if (typeof players[socket.id] !== 'undefined') {
+			sendMessage('<span class="playerName">' + players[socket.id].playerName + '</span> has left the game!');	
+		}
+		
     delete players[socket.id];
     
     updateScore();
@@ -33,7 +37,9 @@ io.on('connection', function(socket) {
 	  	playerName: playerName
 		};
 		  	
-		players[socket.id] = newPlayer; 	  	
+		players[socket.id] = newPlayer;
+		
+		sendMessage('<span class="playerName">' + playerName + '</span> has joined the game!');	
 		    
     if (io.sockets.connected[socket.id]) {
 			// send the food to the new player
@@ -56,6 +62,8 @@ io.on('connection', function(socket) {
 		  snake: snake
 	  };
 	  
+		sendMessage('<span class="playerName">' + players[socket.id].playerName + '</span> started a new game!');	
+
     socket.broadcast.emit('new snake', snakeInfo);
   });
 	
@@ -79,6 +87,8 @@ io.on('connection', function(socket) {
     if (oldScore > 0) {
 			updateScore();
 		}
+		
+		sendMessage('<span class="playerName">' + players[socket.id].playerName + '</span> has died!');	
   });
   
   function updateScore() {
@@ -89,6 +99,10 @@ io.on('connection', function(socket) {
 	    }
 		}
 	  io.sockets.emit('update scoreboard', scores);
+  }
+  
+  function sendMessage(message) {
+	  io.sockets.emit('new message', message);
   }
 });
 
