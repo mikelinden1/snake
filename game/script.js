@@ -28,10 +28,7 @@ $(function() {
 	var direction = newRandomNumber(0, 3);
 	var nextDirection = direction;
 	var score = 0;
-	var myInfo = {
-		id: 1,
-		playerName: 'Mike'
-	};
+	var myInfo = {};
 
 	var gameLogic = function() {
 		
@@ -76,7 +73,7 @@ $(function() {
 					colorCell(food.x, food.y, "food");
 					foodOnBoard.push(food);
 					
-					// call socket "food added"
+					socket.emit('food added', food);
 				} else {
 					newFood();
 				}
@@ -104,8 +101,24 @@ $(function() {
 				}
 			}
 			
-			// call socket "food eaten"
+	//		socket.emit('food eaten', food);
 		};
+		
+		socket.emit('ask for food', null);
+		socket.on('food delivery', function(food) {
+			foodOnBoard = food;
+			
+			if (foodOnBoard.length) {
+				placeFood();
+			} else {
+				spawnFood(5);
+			}
+		});
+		
+		socket.on('new food', function(food) {
+			colorCell(food.x, food.y, "food");
+			foodOnBoard.push(food);
+		});
 		
 		var removeSnake = function(snakeID) {
 			$(".cell.snake[data-snakeID=" + snakeID + "]").removeClass("snake otherSnake").attr("data-snakeID",null);
@@ -125,6 +138,8 @@ $(function() {
 			var headOfSnakeY = headOfSnake.y;
 			
 			var newHeadOfSnake = { x: headOfSnakeX, y: headOfSnakeY };
+			
+			var oldTailOfSnake = snake[snake.length - 1];
 			
 			switch(direction) {
 				case 0:
@@ -165,13 +180,17 @@ $(function() {
 			var snakeNoHead = snake.slice(0);
 			snakeNoHead.unshift(0); //force a copy instead of a reference 
 			
-			var ateMyself = checkCollison(newHeadOfSnake, snakeNoHead); //check if the snake hit itself
+			//var ateMyself = checkCollison(newHeadOfSnake, snakeNoHead); //check if the snake hit itself
+			
+			var ateMyself = $(".row").eq(newHeadOfSnake.y).find(".cell").eq(newHeadOfSnake.x).hasClass("snake");
 			
 			if (ateMyself) {
 				gameOver = true;
 			}
 			
 			if (gameOver) {
+				socket.emit('snake died', null);
+
 				var highScore = getCookie("highScore");
 
 				if (!highScore) {
@@ -211,11 +230,19 @@ $(function() {
 			} else {
 				// if they didn't eat food remove the tail to keep the snake the same length. If they did eat food keep the tail so the snake grows by one segment
 				
-				unColorCell(snake[snake.length - 1].x, snake[snake.length - 1].y, "snake");
-				setSnakeID(snake[snake.length - 1].x, snake[snake.length - 1].y, null);
+				unColorCell(oldTailOfSnake.x, oldTailOfSnake.y, "snake");
+				setSnakeID(oldTailOfSnake.x, oldTailOfSnake.y, null);
 				snake.pop(); 
-			}				
-		
+			}		
+			
+			var snakeInfo = {
+				newHead: newHeadOfSnake,
+				oldTail: oldTailOfSnake,
+				ate: ateFood
+			};
+			
+			socket.emit('snake moved', snakeInfo);
+			
 			setTimeout(function() { moveSnake(); }, gameDelay);
 		};
 		
@@ -278,10 +305,12 @@ $(function() {
 				lastSegment = { x: newSegmentX, y: newSegmentY };
 			}
 			
+			socket.emit('new snake', snake);
+			
 			moveSnake();
 		}
 				
-		$(".startGameBtn").click(function() {
+		$("#joinGameForm").submit(function() {
 			var playerName = $(".playerName").val();
 			
 			if (playerName === '') {
@@ -291,24 +320,60 @@ $(function() {
 				$(".playerName").removeClass("error");
 			}
 			
+	    socket.emit('new player', playerName);
+
 			myInfo.playerName = playerName;
 			
 			$("#startGamePop").hide();
 			
-			if (!foodOnBoard.length) {
-				spawnFood(5);
-			} else {
-				placeFood();
-			}
-			
 			startNewGame();
+			
+			return false;
 		});
 		
 		$(".newGameBtn").click(function() {
 			$("#gameOverPop").hide();
 			startNewGame();
 		});
+
+		socket.on('new snake ID', function(snakeID) {
+	    myInfo.id = snakeID;
+	  });
+	  
+	  socket.on('new snake', function(snakeInfo) {
+	    var snakeID = snakeInfo.snakeID;
+	    var snake = snakeInfo.snake;
 	
+	    for (var i=0; i<snake.length; i++) {
+				$(".row").eq(snake[i].y).find(".cell").eq(snake[i].x).attr("data-snakeID",snakeID).addClass('snake otherSnake');
+		  }
+	  });
+	  
+	  socket.on('snake moved', function(snakeInfo) {
+		  var newHead = snakeInfo.newHead;
+		  var oldTail = snakeInfo.oldTail;
+		  
+			$(".row").eq(newHead.y).find(".cell").eq(newHead.x).attr("data-snakeID",snakeInfo.snakeID).addClass('snake otherSnake');
+			
+			if (snakeInfo.ate) {
+				unColorCell(newHead.x, newHead.y, "food"); //remove the food
+														
+				// remove food from food object
+				for (var i = 0; i < foodOnBoard.length; i++) {
+					if (foodOnBoard[i].x === newHead.x && foodOnBoard[i].y === newHead.y) {
+						foodOnBoard.splice(i, 1)
+						break;
+					}
+				}
+			} else {
+				$(".row").eq(oldTail.y).find(".cell").eq(oldTail.x).attr("data-snakeID",null).removeClass('snake otherSnake');
+			}
+	    
+	  });
+	  
+	  socket.on('snake died', function(snakeID) {
+		  removeSnake(snakeID);
+		});
 	}();
 	
 	
