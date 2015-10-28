@@ -1,6 +1,7 @@
 {
   "name": "multiplayer-snake",
   "version": "0.0.1",
+  "main": "index.js",
   "description": "An online multiplayer snake game",
   "dependencies": {
     "express": "^4.10.2",
