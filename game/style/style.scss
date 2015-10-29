@@ -1,0 +1,190 @@
+$boardBGColor: #c9e238;
+$snakeColor: #757914;
+$otherSnakeColor: rgba(117,121,20,0.7);
+$deadSnakeColor: #bb7403;
+$lightBlueColor: #0096ff;
+$midBlueColor: #0574c3;
+$darkBlueColor: #004475;
+
+* {
+	font-family:'Acme',sans-serif;
+}
+
+#gameTitle {
+	text-align:center;
+	font-size:50px;
+	text-transform:uppercase;
+	margin:0;
+}
+
+#myScore {
+	position:absolute;
+	top:50px;
+	left:50%;
+	margin-left:-370px;
+	font-size:20px;
+}
+
+#Container {
+	width:744px;
+	height:504px;
+	position:absolute;
+	top:75px;
+	left:50%;
+	margin-left:-372px;
+
+	#board {
+		width:500px;
+		height:500px;
+		float:left;
+		border:2px solid $snakeColor;
+		background-color:$boardBGColor;
+		
+		.row {
+			width:auto;
+			height:10px;
+		}
+		
+		.cell {
+			width:10px;
+			height:10px;
+			display:inline-block;
+			vertical-align:top;
+			
+			&.food {
+				background-image:url(../images/food.png);
+			}
+			
+			&.deadSnake {
+				border:1px solid $boardBGColor;
+				width:8px;
+				height:8px;
+				background-color:$deadSnakeColor;
+			}
+			
+			&.snake {
+				border:1px solid $boardBGColor;
+				width:8px;
+				height:8px;
+				background-color:$snakeColor;
+				
+				&.otherSnake {
+					background-color:$otherSnakeColor;
+				}
+			}
+		}
+	}
+	
+	#scoreBoard {
+		float:right;
+		background-color:$darkBlueColor;
+		width:200px;
+		height:464px;
+		padding:20px;
+		color:#fff;
+		
+		h1 {
+			margin:0 0 10px;
+			text-align:center;
+			color:#fff;
+		}
+		
+		.noPlayers {
+			font-size:22px;
+			color:$midBlueColor;
+			text-align:center;
+		}
+		
+		.sbScore {
+			font-size:22px;
+			color:$midBlueColor;	
+			
+			&:first-child {
+				color:$lightBlueColor;
+				font-size:24px;
+			}		
+		}
+	}
+}
+
+
+#Messages {
+	width:744px;
+	height:auto;
+	position:absolute;
+	top:585px;
+	left:50%;
+	margin-left:-372px;
+	font-size:20px;
+	font-weight:400;
+	text-align:center;
+	
+	.message {
+		.playerName {
+			color:$lightBlueColor;
+		}
+	}
+}
+
+
+.pop {
+	position:fixed;
+	top:210px;
+	left:50%;
+	width:210px;
+	height:180px;
+	padding:20px;
+	text-align:center;
+	margin-left:-245px;
+	background:#fff;
+	-webkit-box-shadow:0 0 20px 0 rgba(58,58,58,0.7);
+	box-shadow:0 0 20px 0 rgba(58,58,58,0.7);
+	z-index:2;
+	display:none;
+	
+	h1, h2, h3 {
+		margin:0 0 10px;
+	}
+	
+	input {
+		width:100%;
+		height:auto;
+		box-sizing:border-box;
+		padding:10px 20px;
+		text-align:center;
+		border:1px solid #000;
+		font-size:18px;
+		margin-top:10px;
+		outline:none;
+		
+		&:focus {
+			border-color:$midBlueColor;
+		}
+		
+		&.error {
+			border-color:#ee1010;
+		}
+	}
+	
+	button {
+		position:absolute;
+		bottom:0;
+		left:0;
+		width:100%;
+		height:60px;
+		padding:10px 20px;
+		text-align:center;
+		box-sizing:border-box;
+		border:0;
+		font-size:20px;
+		text-transform:uppercase;
+		background-color:$lightBlueColor;
+		color:#fff;
+		cursor:pointer;
+		
+		&:hover {
+			background-color:$midBlueColor;
+		}
+	}
+			
+}

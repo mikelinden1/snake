@@ -184,5 +184,9 @@ function newRandomNumber(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 function exists(a) {
-	return a && typeof a !== 'undefined';
+	if (typeof a === 'boolean') { // if boolean return true to avoid false negatives
+		return true;
+	} else {
+		return a && typeof a !== 'undefined';
+	}
 }

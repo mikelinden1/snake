@@ -386,7 +386,7 @@ $(function() {
 
 		socket.on('snake moved', function(snakeInfo) {
 
-			if (!exists(snakeInfo) || !exists(snakeInfo.newHead) || !exists(snakeInfo.oldTail) || typeof snakeInfo.ate === 'undefined') {
+			if (!exists(snakeInfo) || !exists(snakeInfo.newHead) || !exists(snakeInfo.oldTail) || !exists(snakeInfo.ate)) {
 				return false;
 			}
 			
@@ -453,7 +453,11 @@ $(function() {
 	
 	// utility functions
 	function exists(a) {
-		return a && typeof a !== 'undefined';
+		if (typeof a === 'boolean') { // if boolean return true to avoid false negatives
+			return true;
+		} else {
+			return a && typeof a !== 'undefined';
+		}
 	}
 	function newRandomNumber(min, max) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -464,9 +468,13 @@ $(function() {
 		if (exists(snakeID)) {
 			cell.attr('data-snakeID',snakeID);
 		}
+		
+		return cell;
 	}
 	function unColorCell(x, y, theClass) {
-		$('.row').eq(y).find('.cell').eq(x).removeClass(theClass).attr('data-snakeID',null);
+		var cell = $('.row').eq(y).find('.cell').eq(x).removeClass(theClass).attr('data-snakeID',null);
+		
+		return cell;
 	}
 	function checkCollison(needle, haystack) {
 		for (var i = 0; i < haystack.length; i++) {
