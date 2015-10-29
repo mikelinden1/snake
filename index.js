@@ -35,6 +35,7 @@ io.on('connection', function(socket) {
 	if (exists(io.sockets.connected[socket.id])) {
 		// send the food to the new player
 		io.sockets.connected[socket.id].emit('food delivery', foodOnBoard);
+		updateScore();
 	}
 	
   socket.on('disconnect', function() { 
