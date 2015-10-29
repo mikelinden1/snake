@@ -3,7 +3,7 @@ var socket = io();
 $(function() {
 	'use strict';
 
-	var gameDelay = 100;
+	var gameDelay = 100; // will be set by the level dropdown later
 	var columns = 50;
 	var rows = 50;
 	var foodOnBoard = [];
@@ -205,6 +205,7 @@ $(function() {
 				
 				$('.cell.snake[data-snakeID=' + myInfo.id + ']').removeClass('snake otherSnake').addClass('deadSnake'); // leave my snake on the board but make it red
 				
+				$('#gameOverPop .level').val(gameDelay);
 				$('#gameOverPop').show();
 
 				return false; // end the game loop
@@ -334,9 +335,32 @@ $(function() {
 			
 			moveSnake(); // start the animation loop
 		};
+		
+		var setGameDelay = function(level) {
+			switch(level) {
+				case 'Easy':
+					gameDelay = 300;
+					break;
+				case 'Medium':
+					gameDelay = 150;
+					break;
+				case 'Hard':
+					gameDelay = 100;
+					break;
+				case 'Expert':
+					gameDelay = 50;
+					break;
+				default:
+					gameDelay = 150;
+					break;
+			}
+		};
 				
 		$('#joinGameForm').submit(function() {
 			var playerName = $('.playerName').val();
+			var level = $('#startGamePop .level').val();
+
+			setGameDelay(level);
 			
 			if (playerName === '') {
 				$('.playerName').addClass('error');
@@ -357,6 +381,9 @@ $(function() {
 		});
 		
 		$('.newGameBtn').click(function() {
+			var level = $('#gameOverPop .level').val();
+			setGameDelay(level);
+			
 			$('#gameOverPop').hide();
 			startNewGame();
 		});

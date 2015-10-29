@@ -129,11 +129,11 @@ $darkBlueColor: #004475;
 
 .pop {
 	position:fixed;
-	top:210px;
+	top:200px;
 	left:50%;
 	width:210px;
-	height:180px;
-	padding:20px;
+	height:auto;
+	padding:20px 20px 80px 20px;
 	text-align:center;
 	margin-left:-245px;
 	background:#fff;
@@ -146,7 +146,7 @@ $darkBlueColor: #004475;
 		margin:0 0 10px;
 	}
 	
-	input {
+	input, select {
 		width:100%;
 		height:auto;
 		box-sizing:border-box;
