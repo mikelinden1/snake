@@ -1,0 +1,177 @@
+* {
+	font-family:'Acme',sans-serif;
+}
+
+#gameTitle {
+	text-align:center;
+	font-size:50px;
+	text-transform:uppercase;
+	margin:0;
+}
+
+#myScore {
+	position:absolute;
+	top:50px;
+	left:50%;
+	margin-left:-370px;
+	font-size:20px;
+}
+
+#Container {
+	width:744px;
+	height:504px;
+	position:absolute;
+	top:75px;
+	left:50%;
+	margin-left:-372px;
+}
+
+#board {
+	width:500px;
+	height:500px;
+	float:left;
+	border:2px solid #757914;
+	background-color:#c9e238;
+}
+
+#scoreBoard {
+	float:right;
+	background-color:#004475;
+	width:200px;
+	height:464px;
+	padding:20px;
+	color:#fff;
+}
+
+#scoreBoard h1 {
+	margin:0 0 10px;
+	text-align:center;
+	color:#fff;
+}
+
+#scoreBoard .noPlayers {
+	font-size:22px;
+	color:#0574c3;
+	text-align:center;
+}
+
+#scoreBoard .sbScore {
+	font-size:22px;
+	color:#0574c3;
+}
+
+#scoreBoard .sbScore:first-child {
+	color:#0096ff;
+	font-size:24px;
+}
+
+.row {
+	width:auto;
+	height:10px;
+}
+
+.cell {
+	width:10px;
+	height:10px;
+	display:inline-block;
+	vertical-align:top;
+}
+
+.cell.food {
+	background-image:url(../images/food.png);
+}
+
+.cell.deadSnake {
+	border:1px solid #c9e238;
+	width:8px;
+	height:8px;
+	background-color:#bb7403;
+}
+
+.cell.snake {
+	border:1px solid #c9e238;
+	width:8px;
+	height:8px;
+	background-color:#757914;
+}
+
+.cell.otherSnake {
+	background-color:rgba(117,121,20,0.7);
+}
+
+#Messages {
+	width:744px;
+	height:auto;
+	position:absolute;
+	top:585px;
+	left:50%;
+	margin-left:-372px;
+	font-size:20px;
+	font-weight:400;
+	text-align:center;
+}
+
+#Messages .message .playerName {
+	color:#0096ff;
+}
+
+.pop {
+	position:fixed;
+	top:210px;
+	left:50%;
+	width:210px;
+	height:180px;
+	padding:20px;
+	text-align:center;
+	margin-left:-245px;
+	background:#fff;
+	-webkit-box-shadow:0 0 20px 0 rgba(58,58,58,0.7);
+	box-shadow:0 0 20px 0 rgba(58,58,58,0.7);
+	z-index:2;
+	display:none;
+}
+
+.pop h1,.pop h2,.pop h3 {
+	margin:0 0 10px;
+}
+
+.pop input {
+	width:100%;
+	height:auto;
+	box-sizing:border-box;
+	padding:10px 20px;
+	text-align:center;
+	border:1px solid #000;
+	font-size:18px;
+	margin-top:10px;
+	outline:none;
+}
+
+.pop input:focus {
+	border-color:#0574c3;
+}
+
+.pop input.error {
+	border-color:#ee1010;
+}
+
+.pop button {
+	position:absolute;
+	bottom:0;
+	left:0;
+	width:100%;
+	height:60px;
+	padding:10px 20px;
+	text-align:center;
+	box-sizing:border-box;
+	border:0;
+	font-size:20px;
+	text-transform:uppercase;
+	background-color:#0096ff;
+	color:#fff;
+	cursor:pointer;
+}
+
+.pop button:hover {
+	background-color:#0574c3;
+}
