@@ -97,7 +97,7 @@ io.on('connection', function(socket) {
   
     if (!exists(player)) {
 	    player = {
-		    playerName: "Unknown Player",
+		    playerName: 'Unknown Player',
 		    score: 0
 		  }
 		  
@@ -144,7 +144,7 @@ io.on('connection', function(socket) {
        
     if (!exists(player)) {
 	    player = {
-		    playerName: "Unknown Player",
+		    playerName: 'Unknown Player',
 		    score: 0
 		  }
 		  

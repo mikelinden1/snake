@@ -1,7 +1,7 @@
 var socket = io();
 
 $(function() {
-	"use strict";
+	'use strict';
 
 	var gameDelay = 100;
 	var columns = 50;
@@ -16,16 +16,16 @@ $(function() {
 	var gameOver = false;
 
 	//init the board
-	$("#startGamePop").show();
+	$('#startGamePop').show();
 	
 	for (var r = 0; r < rows; r++) {
 		
-		var thisRow = $("<DIV />").addClass("row").attr("row",r);
+		var thisRow = $('<DIV />').addClass('row');
 		
-		thisRow.appendTo("#board");
+		thisRow.appendTo('#board');
 		
 		for (var c = 0; c < columns; c++) {
-			$("<DIV />").addClass("cell").appendTo(thisRow).attr("row",c);
+			$('<DIV />').addClass('cell').appendTo(thisRow);
 		}
 		
 	}
@@ -42,10 +42,11 @@ $(function() {
 				
 				var food = { x: newRandomNumber(0, columns - 1), y: newRandomNumber(0, rows - 1) };
 				
-				var badPlace = checkCollison(food, foodOnBoard) && !$(".row").eq(food.y).find(".cell").eq(food.x).hasClass("snake");
+				// check if the new food is overlapping a snake or other food
+				var badPlace = checkCollison(food, foodOnBoard) && !$('.row').eq(food.y).find('.cell').eq(food.x).hasClass('snake');
 				
 				if (!badPlace) {
-					colorCell(food.x, food.y, "food");
+					colorCell(food.x, food.y, 'food');
 					foodOnBoard.push(food);
 					
 					socket.emit('food added', food);
@@ -64,9 +65,9 @@ $(function() {
 				return false;
 			}
 			
-			unColorCell(food.x, food.y, "food"); //remove the food
+			unColorCell(food.x, food.y, 'food'); //remove the food
 
-			// remove food from food object
+			// remove food from foodOnBoard object
 			for (var i = 0; i < foodOnBoard.length; i++) {
 				if (foodOnBoard[i].x === food.x && foodOnBoard[i].y === food.y) {
 					foodOnBoard.splice(i, 1);
@@ -76,16 +77,17 @@ $(function() {
 			
 		};
 		
-		socket.on('food delivery', function(food) {
-			if (!exists(food)) {
+		// receive new food package from server (only happens when you load the page)
+		socket.on('food delivery', function(foodPackage) { 
+			if (!exists(foodPackage)) {
 				return false;
 			}
 			
-			$(".cell.food").removeClass("food");
-			foodOnBoard = food;
+			$('.cell.food').removeClass('food'); // remove any leftover food
+			foodOnBoard = foodPackage;
 
 			for (var i = 0; i < foodOnBoard.length; i++) {
-				colorCell(foodOnBoard[i].x, foodOnBoard[i].y, "food");
+				colorCell(foodOnBoard[i].x, foodOnBoard[i].y, 'food');
 			}
 		});
 		
@@ -94,7 +96,7 @@ $(function() {
 				return false;
 			}
 			
-			colorCell(food.x, food.y, "food");
+			colorCell(food.x, food.y, 'food');
 			foodOnBoard.push(food);
 		});
 		
@@ -111,18 +113,18 @@ $(function() {
 				return false;
 			}
 			
-			var isMySnake = snakeID === myInfo.id;
-			var snakeClasses = "snake otherSnake";
+			var isMySnake = (snakeID === myInfo.id);
+			var snakeClasses = 'snake otherSnake';
 			
 			if (isMySnake) {
-				snakeClasses += " deadSnake"; // only remove my dead snake
+				snakeClasses += ' deadSnake'; // only remove my dead snake
 			}
 			
-			$(".cell.snake[data-snakeID=" + snakeID + "]").removeClass(snakeClasses).attr("data-snakeID",null);
+			$('.cell.snake[data-snakeID=' + snakeID + ']').removeClass(snakeClasses).attr('data-snakeID',null);
 		};
 		
 		var updateScore = function() {
-			$(".score").text(score);
+			$('.score').text(score);
 		};
 		
 		var moveSnake = function() { //snake animation loop
@@ -179,7 +181,7 @@ $(function() {
 			}
 			
 			// check if my snake hit another snake or itself
-			var cannibal = $(".row").eq(newHeadOfSnake.y).find(".cell").eq(newHeadOfSnake.x).hasClass("snake");
+			var cannibal = $('.row').eq(newHeadOfSnake.y).find('.cell').eq(newHeadOfSnake.x).hasClass('snake');
 			
 			if (cannibal) {
 				gameOver = true;
@@ -188,28 +190,27 @@ $(function() {
 			if (gameOver) {
 				socket.emit('snake died');
 
-				var highScore = getCookie("highScore");
+				var highScore = getCookie('highScore');
 
 				if (!highScore) {
 					highScore = 0;
 				}
 				
 				if (score > highScore) {
-					$("#gameOverPop .highScore").show();
-					setCookie("highScore", score, 50);
+					$('#gameOverPop .highScore').show();
+					setCookie('highScore', score, 50);
 				} else {
-					$("#gameOverPop .highScore").hide();
+					$('#gameOverPop .highScore').hide();
 				}
 				
-				$(".cell.snake[data-snakeID=" + myInfo.id + "]").removeClass("snake otherSnake").addClass("deadSnake");
+				$('.cell.snake[data-snakeID=' + myInfo.id + ']').removeClass('snake otherSnake').addClass('deadSnake'); // leave my snake on the board but make it red
 				
-				$("#gameOverPop").show();
+				$('#gameOverPop').show();
 
 				return false; // end the game loop
 			}
 			
-			colorCell(newHeadOfSnake.x, newHeadOfSnake.y, "snake"); // add the head to the DOM
-			setSnakeID(newHeadOfSnake.x, newHeadOfSnake.y, myInfo.id);
+			colorCell(newHeadOfSnake.x, newHeadOfSnake.y, 'snake', myInfo.id); // add the new head to the DOM
 		
 			snake.unshift(newHeadOfSnake); // add the new head to the front of the snake array
 		
@@ -226,9 +227,9 @@ $(function() {
 			} else {
 				// if they didn't eat food remove the tail to keep the snake the same length. If they did eat food keep the tail so the snake grows by one segment
 				
-				unColorCell(oldTailOfSnake.x, oldTailOfSnake.y, "snake"); // remove the old snake tail from the dom
-				setSnakeID(oldTailOfSnake.x, oldTailOfSnake.y, null);
-				snake.pop(); 
+				unColorCell(oldTailOfSnake.x, oldTailOfSnake.y, 'snake'); // remove the old snake tail from the dom
+
+				snake.pop(); // remove the tail from the snake Array
 			}		
 			
 			var snakeInfo = {
@@ -278,7 +279,7 @@ $(function() {
 		var startNewGame = function() {
 			// remove the old snake if necessary
 			removeSnake(myInfo.id);
-			$(".cell").removeClass("deadSnake");
+			$('.cell').removeClass('deadSnake');
 			snake = [];
 
 			// reset gameover and score
@@ -286,12 +287,12 @@ $(function() {
 			score = 0;
 			updateScore();
 			
-			// pick a random direction
+			// pick a new random direction
 			nextDirection = newRandomNumber(0, 3);
 			
 			// pick a random coordinate to start from
-			var snakeStartingPointX = newRandomNumber(10, columns-10);
-			var snakeStartingPointY = newRandomNumber(10, rows-10);
+			var snakeStartingPointX = newRandomNumber(10, columns-11);
+			var snakeStartingPointY = newRandomNumber(10, rows-11);
 			
 			var lastSegment = {x: snakeStartingPointX, y: snakeStartingPointY};
 						
@@ -322,46 +323,45 @@ $(function() {
 				
 				snake.push(newSegment);
 				
-				setSnakeID(newSegment.x, newSegment.y, myInfo.id);
-				colorCell(newSegment.x, newSegment.y, "snake");
+				colorCell(newSegment.x, newSegment.y, 'snake', myInfo.id);
 
 				newSegmentX = newSegment.x;
 				newSegmentY = newSegment.y;
 				lastSegment = { x: newSegmentX, y: newSegmentY };
 			}
 			
-			socket.emit('new snake', snake); // tell everyone else about my new snake
+			socket.emit('new snake', snake); // tell everyone about my new snake
 			
 			moveSnake(); // start the animation loop
 		};
 				
-		$("#joinGameForm").submit(function() {
-			var playerName = $(".playerName").val();
+		$('#joinGameForm').submit(function() {
+			var playerName = $('.playerName').val();
 			
 			if (playerName === '') {
-				$(".playerName").addClass("error");
+				$('.playerName').addClass('error');
 				return false;	
 			} else {
-				$(".playerName").removeClass("error");
+				$('.playerName').removeClass('error');
 			}
 			
 			socket.emit('new player', playerName);
 
 			myInfo.playerName = playerName;
 			
-			$("#startGamePop").hide();
+			$('#startGamePop').hide();
 			
 			startNewGame();
 			
 			return false;
 		});
 		
-		$(".newGameBtn").click(function() {
-			$("#gameOverPop").hide();
+		$('.newGameBtn').click(function() {
+			$('#gameOverPop').hide();
 			startNewGame();
 		});
-
-		// other snake socket listeners
+		
+		//receive my snakeID after I load the page
 		socket.on('new snake ID', function(snakeID) {
 			if (!exists(snakeID)) {
 				return false;
@@ -369,7 +369,8 @@ $(function() {
 			
 			myInfo.id = snakeID;
 		});
-		
+
+		// other snake socket listeners
 		socket.on('new snake', function(snakeInfo) {
 			if (!exists(snakeInfo) || !exists(snakeInfo.snakeID) || !exists(snakeInfo.snake)) {
 				return false;
@@ -379,7 +380,7 @@ $(function() {
 			var snake = snakeInfo.snake;
 	
 			for (var i=0; i<snake.length; i++) {
-				$(".row").eq(snake[i].y).find(".cell").eq(snake[i].x).attr("data-snakeID",snakeID).addClass('snake otherSnake');
+				colorCell(snake[i].x, snake[i].y, 'snake otherSnake', snakeID)
 			}
 		});
 
@@ -391,11 +392,11 @@ $(function() {
 			
 			var newHead = snakeInfo.newHead;
 			var oldTail = snakeInfo.oldTail;
-			
-			$(".row").eq(newHead.y).find(".cell").eq(newHead.x).attr("data-snakeID",snakeInfo.snakeID).addClass('snake otherSnake');
+					
+			colorCell(newHead.x, newHead.y, 'snake otherSnake', snakeInfo.snakeID); // add the new head
 			
 			if (snakeInfo.ate) {
-				unColorCell(newHead.x, newHead.y, "food"); //remove the food
+				unColorCell(newHead.x, newHead.y, 'food'); //remove the food
 														
 				// remove food from food object
 				for (var i = 0; i < foodOnBoard.length; i++) {
@@ -405,7 +406,7 @@ $(function() {
 					}
 				}
 			} else {
-				$(".row").eq(oldTail.y).find(".cell").eq(oldTail.x).attr("data-snakeID",null).removeClass('snake otherSnake');
+				unColorCell(oldTail.x, oldTail.y, 'snake otherSnake'); // remove the old tail
 			}
 		
 		});
@@ -424,14 +425,14 @@ $(function() {
 			});
 			
 			if (scores.length) {
-				$(".noPlayers").hide();
+				$('.noPlayers').hide();
 			} else {
-				$(".noPlayers").show();
+				$('.noPlayers').show();
 			}
 			
-			$("#scoreBoard .sbScore").remove();
+			$('#scoreBoard .sbScore').remove();
 			for (var i = 0; i < scores.length; i++) {
-				$("<li />").text(scores[i].playerName + " - " + scores[i].score).addClass("sbScore").appendTo("#scoreBoard #Scorers");
+				$('<li />').text(scores[i].playerName + ' - ' + scores[i].score).addClass('sbScore').appendTo('#scoreBoard #Scorers');
 			}
 		});
 		
@@ -440,7 +441,7 @@ $(function() {
 				return false;
 			}
 			
-			var newMessage = $("<DIV />").html(message).addClass("message").prependTo("#Messages").hide().fadeIn('slow');
+			var newMessage = $('<DIV />').html(message).addClass('message').prependTo('#Messages').hide().fadeIn('slow');
 			
 			setTimeout(function() {
 				newMessage.fadeOut('slow', function() { $(this).remove(); });
@@ -451,17 +452,21 @@ $(function() {
 	
 	
 	// utility functions
+	function exists(a) {
+		return a && typeof a !== 'undefined';
+	}
 	function newRandomNumber(min, max) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
-	function colorCell(x, y, theClass) {
-		$(".row").eq(y).find(".cell").eq(x).addClass(theClass);
+	function colorCell(x, y, theClass, snakeID) {
+		var cell = $('.row').eq(y).find('.cell').eq(x).addClass(theClass);
+		
+		if (exists(snakeID)) {
+			cell.attr('data-snakeID',snakeID);
+		}
 	}
 	function unColorCell(x, y, theClass) {
-		$(".row").eq(y).find(".cell").eq(x).removeClass(theClass);
-	}
-	function setSnakeID(x, y, snakeID) {
-		$(".row").eq(y).find(".cell").eq(x).attr("data-snakeID",snakeID);
+		$('.row').eq(y).find('.cell').eq(x).removeClass(theClass).attr('data-snakeID',null);
 	}
 	function checkCollison(needle, haystack) {
 		for (var i = 0; i < haystack.length; i++) {
@@ -475,11 +480,11 @@ $(function() {
 	function setCookie(cookieName, cookieValue, expDays) {
     var d = new Date();
     d.setTime(d.getTime() + (expDays*24*60*60*1000));
-    var expires = "expires="+d.toUTCString();
-    document.cookie = cookieName + "=" + cookieValue + "; " + expires;
+    var expires = 'expires='+d.toUTCString();
+    document.cookie = cookieName + '=' + cookieValue + '; ' + expires;
 	}
 	function getCookie(cookieName) {
-    var name = cookieName + "=";
+    var name = cookieName + '=';
     var ca = document.cookie.split(';');
     for(var i=0; i<ca.length; i++) {
       var c = ca[i];
@@ -491,8 +496,5 @@ $(function() {
 			}
     }
     return null;
-	}
-	function exists(a) {
-		return a && typeof a !== 'undefined';
 	}
 });
