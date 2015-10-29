@@ -335,32 +335,12 @@ $(function() {
 			
 			moveSnake(); // start the animation loop
 		};
-		
-		var setGameDelay = function(level) {
-			switch(level) {
-				case 'Easy':
-					gameDelay = 300;
-					break;
-				case 'Medium':
-					gameDelay = 150;
-					break;
-				case 'Hard':
-					gameDelay = 100;
-					break;
-				case 'Expert':
-					gameDelay = 50;
-					break;
-				default:
-					gameDelay = 150;
-					break;
-			}
-		};
 				
 		$('#joinGameForm').submit(function() {
 			var playerName = $('.playerName').val();
 			var level = $('#startGamePop .level').val();
 
-			setGameDelay(level);
+			gameDelay = level;
 			
 			if (playerName === '') {
 				$('.playerName').addClass('error');
@@ -382,7 +362,7 @@ $(function() {
 		
 		$('.newGameBtn').click(function() {
 			var level = $('#gameOverPop .level').val();
-			setGameDelay(level);
+			gameDelay = level;
 			
 			$('#gameOverPop').hide();
 			startNewGame();
