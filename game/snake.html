@@ -2,17 +2,16 @@
 <html>
 	
 <head>
-  <meta charset="utf-8">
   <title>Snake</title>
 
 	<meta name="viewport" content="width=device-width">
 	
 	<link href='https://fonts.googleapis.com/css?family=Acme' rel='stylesheet' type='text/css'>
-	<link href='style.css' rel='stylesheet' type='text/css'>
+	<link href='style/style.min.css' rel='stylesheet' type='text/css'>
 	
-	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+	<script type="text/javascript" src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-	<script type="text/javascript" src="script.js"></script>
+	<script type="text/javascript" src="scripts/script.min.js"></script>
 	
 </head>
 
@@ -20,18 +19,18 @@
 	
 	<h1 ID="gameTitle">Snake</h1>
 	
-	<DIV ID="myScore">Score <span class="score"></span></DIV>
+	<DIV ID="myScore">Score <span class="score">0</span></DIV>
 	
 	<DIV ID="gameOverPop" class="pop">
 		<h1>Game Over!</h1>
-		<h2>Score: <span class="score"></span></h2>
+		<h2>Score: <span class="score">0</span></h2>
 		<h3 class="highScore">High Score!</h3>
 		<button class="newGameBtn">New Game</button>
 	</DIV>
 	
 	<DIV ID="startGamePop" class="pop">
 		<h1>Join Game!</h1>
-		<form ID="joinGameForm">
+		<form ID="joinGameForm" action="snake.html">
 			<input type="text" class="playerName" name="playerName" placeholder="Enter Your Name" />
 			<button class="startGameBtn">Start Game</button>
 		</form>

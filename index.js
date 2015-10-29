@@ -11,18 +11,34 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/game/snake.html');
 });
 
+var columns = 50;
+var rows = 50;	
+var numOfFoodPieces = 8;
 var players = {};
 var foodOnBoard = [];
 
+var spawnFood = function(numOfPieces) {
+
+	var newFood = function() {
+		
+		var food = { x: newRandomNumber(0, columns - 1), y: newRandomNumber(0, rows - 1) };		
+		foodOnBoard.push(food);
+	};
+	
+	for (var i = 0; i < numOfPieces; i++) {
+		newFood();
+	}
+}(numOfFoodPieces);
+
 io.on('connection', function(socket) {
 	
-	if (io.sockets.connected[socket.id]) {
+	if (exists(io.sockets.connected[socket.id])) {
 		// send the food to the new player
 		io.sockets.connected[socket.id].emit('food delivery', foodOnBoard);
 	}
 	
   socket.on('disconnect', function() { 
-	  if (typeof players[socket.id] !== 'undefined') {
+	  if (exists(players[socket.id])) {
 			sendMessage('<span class="playerName">' + players[socket.id].playerName + '</span> has left the game!');	
 		}
 		
@@ -32,6 +48,10 @@ io.on('connection', function(socket) {
   });
   
   socket.on('new player', function(playerName) { 
+	  if (!exists(playerName)) {
+	  	return false;
+	  }
+	  
 	  var newPlayer = {
 	  	score: 0,
 	  	playerName: playerName
@@ -47,32 +67,70 @@ io.on('connection', function(socket) {
 		}
 		
 		updateScore();
+			
   });
   
   socket.on('food added', function(food) {
+	  if (!exists(food)) {
+			return false;
+		}
+		
 	  // add the new food
 		foodOnBoard.push(food);
-		
+				
 		socket.broadcast.emit('new food', food);
+		
   });
   
   socket.on('new snake', function(snake) {
+	  
+	  if (!exists(snake)) {
+			return false;
+		}
 	  var snakeInfo = {
 		  snakeID: socket.id,
 		  snake: snake
 	  };
 	  
-		sendMessage('<span class="playerName">' + players[socket.id].playerName + '</span> started a new game!');	
+	  var player = players[socket.id];
+  
+    if (!exists(player)) {
+	    player = {
+		    playerName: "Unknown Player",
+		    score: 0
+		  }
+		  
+			players[socket.id] = player;
+	  }
+  
+		sendMessage('<span class="playerName">' + player.playerName + '</span> started a new game!');	
 
     socket.broadcast.emit('new snake', snakeInfo);
+	  
   });
 	
 	socket.on('snake moved', function(snakeInfo) {
+	  if (!exists(snakeInfo)) {
+			return false;
+		}
+	
 		snakeInfo.snakeID = socket.id;
 		
 		if (snakeInfo.ate) {
+			var food = snakeInfo.newHead;
+			
+			socket.broadcast.emit('food eaten', food);
+			
+			for (var i = 0; i < foodOnBoard.length; i++) {
+				if (foodOnBoard[i].x === food.x && foodOnBoard[i].y === food.y) {
+					foodOnBoard.splice(i, 1)
+					break;
+				}
+			}
+			
 			players[socket.id].score++;
 			updateScore();
+			
 		}
 				
     socket.broadcast.emit('snake moved', snakeInfo);
@@ -81,14 +139,25 @@ io.on('connection', function(socket) {
 	socket.on('snake died', function() {
     socket.broadcast.emit('snake died', socket.id);
     
-    var oldScore = players[socket.id].score;
-    players[socket.id].score = 0;
+    var player = players[socket.id];
+       
+    if (!exists(player)) {
+	    player = {
+		    playerName: "Unknown Player",
+		    score: 0
+		  }
+		  
+		  players[socket.id] = player;
+	  }
+  
+    var oldScore = player.score;
+    player.score = 0;
     
     if (oldScore > 0) {
 			updateScore();
 		}
 		
-		sendMessage('<span class="playerName">' + players[socket.id].playerName + '</span> has died!');	
+		sendMessage('<span class="playerName">' + player.playerName + '</span> has died!');	
   });
   
   function updateScore() {
@@ -109,3 +178,10 @@ io.on('connection', function(socket) {
 http.listen(app.get('port'), function() {
   console.log('listening on *:' + app.get('port'));
 });
+
+function newRandomNumber(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function exists(a) {
+	return a && typeof a !== 'undefined';
+}
