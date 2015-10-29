@@ -1,2 +1,5 @@
 # snake
 A multiplayer Snake Game using Node.js and Socket.io
+
+Link to game:
+http://snake-mlinden.mod.bz
