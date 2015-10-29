@@ -227,7 +227,7 @@ $(function() {
 			} else {
 				// if they didn't eat food remove the tail to keep the snake the same length. If they did eat food keep the tail so the snake grows by one segment
 				
-				unColorCell(oldTailOfSnake.x, oldTailOfSnake.y, 'snake'); // remove the old snake tail from the dom
+				unColorCell(oldTailOfSnake.x, oldTailOfSnake.y, 'snake', null); // remove the old snake tail from the dom
 
 				snake.pop(); // remove the tail from the snake Array
 			}		
@@ -396,17 +396,9 @@ $(function() {
 			colorCell(newHead.x, newHead.y, 'snake otherSnake', snakeInfo.snakeID); // add the new head
 			
 			if (snakeInfo.ate) {
-				unColorCell(newHead.x, newHead.y, 'food'); //remove the food
-														
-				// remove food from food object
-				for (var i = 0; i < foodOnBoard.length; i++) {
-					if (foodOnBoard[i].x === newHead.x && foodOnBoard[i].y === newHead.y) {
-						foodOnBoard.splice(i, 1);
-						break;
-					}
-				}
+				foodEaten(newHead);
 			} else {
-				unColorCell(oldTail.x, oldTail.y, 'snake otherSnake'); // remove the old tail
+				unColorCell(oldTail.x, oldTail.y, 'snake otherSnake', null); // remove the old tail
 			}
 		
 		});
@@ -471,8 +463,12 @@ $(function() {
 		
 		return cell;
 	}
-	function unColorCell(x, y, theClass) {
-		var cell = $('.row').eq(y).find('.cell').eq(x).removeClass(theClass).attr('data-snakeID',null);
+	function unColorCell(x, y, theClass, snakeID) {
+		var cell = $('.row').eq(y).find('.cell').eq(x).removeClass(theClass);
+		
+		if (exists(snakeID)) {
+			cell.attr('data-snakeID',snakeID);
+		}
 		
 		return cell;
 	}
