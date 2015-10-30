@@ -123,13 +123,16 @@ $darkBlueColor: #004475;
 		}
 	}
 	
-	#scoreBoard {
+	#rightSide {
 		float:right;
+		
 		background-color:$darkBlueColor;
 		width:200px;
 		height:464px;
 		padding:20px;
 		color:#fff;
+		
+		overflow-y: auto;
 		
 		h1 {
 			margin:0 0 10px;

@@ -439,9 +439,21 @@ $(function() {
 				$('.noPlayers').show();
 			}
 			
-			$('#scoreBoard .sbScore').remove();
+			$('#Scoreboard .sbScore').remove();
 			for (var i = 0; i < scores.length; i++) {
-				$('<li />').addClass('color' + scores[i].color).text(scores[i].playerName + ' - ' + scores[i].score).addClass('sbScore').appendTo('#scoreBoard #Scorers');
+				$('<li />').addClass('color' + scores[i].color).text(scores[i].playerName + ' - ' + scores[i].score).addClass('sbScore').appendTo('#Scoreboard #Scorers');
+			}
+		});
+		
+		socket.on('update leaderboard', function(leaderboard) {
+			console.log("leaderboard",leaderboard);
+			if (!exists(leaderboard) || !leaderboard.length) {
+				return false;
+			}
+			
+			$('#Leaderboard .sbScore').remove();
+			for (var i = 0; i < leaderboard.length; i++) {
+				$('<li />').text(leaderboard[i].name + ' - ' + leaderboard[i].score).addClass('sbScore').appendTo('#Leaderboard #Scorers');
 			}
 		});
 		

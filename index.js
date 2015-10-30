@@ -10,13 +10,12 @@ app.use(express.static(__dirname + '/game'));
 app.get('/', function(req, res) {
   res.sendFile(__dirname + '/game/snake.html');
 });
+    
+var mongo = require('mongodb');
+var monk = require('monk');
+var db = monk('mongodb://snake:snakesnakesnake@apollo.modulusmongo.net:27017/anyN8edo');
 
-var redis = require('redis');
-var redisClient = redis.createClient(); //creates a new client
-
-redisClient.on('connect', function() {
-    console.log('connected');
-});
+var leaderboardCollection = db.get('leaderboard');
 
 var columns = 50;
 var rows = 50;	
@@ -25,6 +24,10 @@ var players = {};
 var foodOnBoard = [];
 var usedColors = [];
 var numOfColors = 15;
+var leaderboard = [];
+var leaderboardMaxLen = 10;
+
+updateLeaderBoard();
 
 var spawnFood = function(numOfPieces) {
 
@@ -40,10 +43,10 @@ var spawnFood = function(numOfPieces) {
 }(numOfFoodPieces);
 
 io.on('connection', function(socket) {
-	
 	if (exists(io.sockets.connected[socket.id])) {
 		// send the food to the new player
 		io.sockets.connected[socket.id].emit('food delivery', foodOnBoard);
+		io.sockets.connected[socket.id].emit('update leaderboard', leaderboard);
 		updateScore();
 	}
 	
@@ -210,6 +213,10 @@ io.on('connection', function(socket) {
     
     if (oldScore > 0) {
 			updateScore();
+			
+			if (leaderboard.length < leaderboardMaxLen || leaderboard[leaderboard.length - 1].score < oldScore) {
+				addToLeaderBoard({ 'name': player.playerName, 'score': oldScore });
+			}
 		}
 		
 		sendMessage('<span class="playerName color' + player.color + '">' + player.playerName + '</span> has died!');	
@@ -229,7 +236,43 @@ io.on('connection', function(socket) {
   function sendMessage(message) {
 	  io.sockets.emit('new message', message);
   }
+  
+  function addToLeaderBoard(scoreInfo) {
+	  leaderboardCollection.insert(scoreInfo, function (error, response) {
+		  if (error) {
+		    console.log("There was a problem adding the information to the database.");
+		    return false;
+		  } else {
+		    updateLeaderBoard();
+		  }
+		});
+  }
+  
 });
+
+function updateLeaderBoard() {
+	leaderboardCollection.find({}, {}, function(error, response) {
+		leaderboard = response;
+		
+		leaderboard.sort(function(a, b){
+			return b.score - a.score;
+		});
+		
+		console.log("leaderboard len", leaderboard.length);
+		
+		if (leaderboard.length > leaderboardMaxLen) {
+			console.log("remove last one!", leaderboard[leaderboard.length - 1]);
+			// remove lowest score	
+			leaderboardCollection.remove(leaderboard[leaderboard.length - 1]);
+			leaderboard.pop();
+		}
+		
+		console.log(leaderboard);
+		
+		io.sockets.emit('update leaderboard', leaderboard);
+	});
+}
+
 
 http.listen(app.get('port'), function() {
   console.log('listening on *:' + app.get('port'));
