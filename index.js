@@ -257,18 +257,14 @@ function updateLeaderBoard() {
 		leaderboard.sort(function(a, b){
 			return b.score - a.score;
 		});
-		
-		console.log("leaderboard len", leaderboard.length);
-		
+				
 		if (leaderboard.length > leaderboardMaxLen) {
 			console.log("remove last one!", leaderboard[leaderboard.length - 1]);
 			// remove lowest score	
 			leaderboardCollection.remove(leaderboard[leaderboard.length - 1]);
 			leaderboard.pop();
 		}
-		
-		console.log(leaderboard);
-		
+				
 		io.sockets.emit('update leaderboard', leaderboard);
 	});
 }
