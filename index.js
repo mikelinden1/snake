@@ -259,7 +259,6 @@ function updateLeaderBoard() {
 		});
 				
 		if (leaderboard.length > leaderboardMaxLen) {
-			console.log("remove last one!", leaderboard[leaderboard.length - 1]);
 			// remove lowest score	
 			leaderboardCollection.remove(leaderboard[leaderboard.length - 1]);
 			leaderboard.pop();
