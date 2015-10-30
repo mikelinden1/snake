@@ -31,6 +31,13 @@ $(function() {
 		
 	}
 	
+	var colorClasses = "";
+		
+	// generate a string of all the color classes
+	for (var i = 0; i < numOfColors; i++) {
+		colorClasses += ' color' + i;
+	}
+	
 	var gameLogic = function() {
 		
 		var spawnFood = function(numOfPieces) {
@@ -115,13 +122,14 @@ $(function() {
 			}
 			
 			var isMySnake = (snakeID === myInfo.id);
-			var snakeClasses = 'snake color*';
+			var snakeClasses = 'snake deadSnake' + colorClasses;
 			
+			var snake = $('.cell.snake[data-snakeID=' + snakeID + ']');
 			if (isMySnake) {
-				snakeClasses += ' deadSnake'; // only remove my dead snake
+				snake = $('.cell.deadSnake[data-snakeID=' + snakeID + ']');
 			}
 			
-			$('.cell.snake[data-snakeID=' + snakeID + ']').removeClass(snakeClasses).attr('data-snakeID',null);
+			snake.removeClass(snakeClasses).attr('data-snakeID',null);
 		};
 		
 		var updateScore = function() {
@@ -204,7 +212,7 @@ $(function() {
 					$('#gameOverPop .highScore').hide();
 				}
 				
-				$('.cell.snake[data-snakeID=' + myInfo.id + ']').removeClass('snake otherSnake').addClass('deadSnake'); // leave my snake on the board but make it red
+				$('.cell.snake[data-snakeID=' + myInfo.id + ']').removeClass('snake').addClass('deadSnake'); // leave my snake on the board but make it red
 				
 				$('#gameOverPop .level').val(gameDelay);
 				$('#gameOverPop').show();
@@ -472,18 +480,11 @@ $(function() {
 		
 		return cell;
 	}
-	
-	var colorClasses;
-	
+		
 	function unColorCell(x, y, theClass, snakeID) {
+		
+		// replace 'color*' with all color classes
 		if (theClass.indexOf('color*') > -1) {
-			if (!exists(colorClasses)) {
-				colorClasses = "";
-				for (var i = 0; i < numOfColors; i++) {
-					colorClasses += ' color' + i;
-				}
-			}
-			
 			theClass = theClass.replace(' color*','') + colorClasses;
 		}
 		
