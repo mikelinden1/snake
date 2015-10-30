@@ -16,6 +16,8 @@ var rows = 50;
 var numOfFoodPieces = 8;
 var players = {};
 var foodOnBoard = [];
+var usedColors = [];
+var numOfColors = 15;
 
 var spawnFood = function(numOfPieces) {
 
@@ -40,7 +42,9 @@ io.on('connection', function(socket) {
 	
   socket.on('disconnect', function() { 
 	  if (exists(players[socket.id])) {
-			sendMessage('<span class="playerName">' + players[socket.id].playerName + '</span> has left the game!');	
+			sendMessage('<span class="playerName color' + players[socket.id].color + '">' + players[socket.id].playerName + '</span> has left the game!');
+			
+			delete usedColors[players[socket.id].color];
 		}
 		
     delete players[socket.id];
@@ -48,23 +52,63 @@ io.on('connection', function(socket) {
     updateScore();
   });
   
+  var newSnakeColor = function(snakeID) {	
+	  	
+		var outOfColors = true;
+		
+		if (usedColors.length < numOfColors) {
+			outOfColors = false;
+		} else {
+			for (var i = 0; i < usedColors.length; i++) {
+				if (typeof usedColors[i] === 'undefined') {
+					outOfColors = false;
+					break;
+				}
+			}
+		}
+		
+		if (outOfColors) {
+			// all colors used, start recycling them
+			usedColors = [];
+		}
+		
+		var foundColor = false;
+
+		while(!foundColor) {
+			var color = newRandomNumber(0, numOfColors - 1);
+			
+			if (typeof usedColors[color] === 'undefined') {
+				usedColors[color] = snakeID;
+				foundColor = true;
+			}
+		}
+				
+		return color;
+		
+  };
+  
   socket.on('new player', function(playerName) { 
 	  if (!exists(playerName)) {
 	  	return false;
 	  }
 	  
+	  var snakeColor = newSnakeColor(socket.id);
+
 	  var newPlayer = {
+		  id: socket.id,
 	  	score: 0,
-	  	playerName: playerName
+	  	playerName: playerName,
+	  	color: snakeColor
 		};
 		  	
 		players[socket.id] = newPlayer;
 		
-		sendMessage('<span class="playerName">' + playerName + '</span> has joined the game!');	
+		sendMessage('<span class="playerName color' + snakeColor + '">' + playerName + '</span> has joined the game!');	
 		    
     if (io.sockets.connected[socket.id]) {
-			// send the food to the new player
-			io.sockets.connected[socket.id].emit('new snake ID', socket.id);
+			// send the player info to the new player
+			
+			io.sockets.connected[socket.id].emit('new player info', newPlayer);
 		}
 		
 		updateScore();
@@ -88,23 +132,26 @@ io.on('connection', function(socket) {
 	  if (!exists(snake)) {
 			return false;
 		}
-	  var snakeInfo = {
-		  snakeID: socket.id,
-		  snake: snake
-	  };
-	  
-	  var player = players[socket.id];
+		
+		var player = players[socket.id];
   
     if (!exists(player)) {
 	    player = {
 		    playerName: 'Unknown Player',
-		    score: 0
+		    score: 0,
+		    color: 0
 		  }
 		  
 			players[socket.id] = player;
 	  }
+	  
+	  var snakeInfo = {
+		  snakeID: socket.id,
+		  snake: snake,
+		  color: player.color
+	  };
   
-		sendMessage('<span class="playerName">' + player.playerName + '</span> started a new game!');	
+		sendMessage('<span class="playerName color' + player.color + '">' + player.playerName + '</span> started a new game!');	
 
     socket.broadcast.emit('new snake', snakeInfo);
 	  
@@ -158,7 +205,7 @@ io.on('connection', function(socket) {
 			updateScore();
 		}
 		
-		sendMessage('<span class="playerName">' + player.playerName + '</span> has died!');	
+		sendMessage('<span class="playerName color' + player.color + '">' + player.playerName + '</span> has died!');	
   });
   
   function updateScore() {
@@ -168,6 +215,7 @@ io.on('connection', function(socket) {
 	      scores.push(players[property]);
 	    }
 		}
+
 	  io.sockets.emit('update scoreboard', scores);
   }
   

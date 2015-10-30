@@ -6,6 +6,7 @@ $(function() {
 	var gameDelay = 100; // will be set by the level dropdown later
 	var columns = 50;
 	var rows = 50;
+	var numOfColors = 15;
 	var foodOnBoard = [];
 	var initSnakeLength = 3;
 	var snake = [];
@@ -114,7 +115,7 @@ $(function() {
 			}
 			
 			var isMySnake = (snakeID === myInfo.id);
-			var snakeClasses = 'snake otherSnake';
+			var snakeClasses = 'snake color*';
 			
 			if (isMySnake) {
 				snakeClasses += ' deadSnake'; // only remove my dead snake
@@ -211,7 +212,7 @@ $(function() {
 				return false; // end the game loop
 			}
 			
-			colorCell(newHeadOfSnake.x, newHeadOfSnake.y, 'snake', myInfo.id); // add the new head to the DOM
+			colorCell(newHeadOfSnake.x, newHeadOfSnake.y, 'snake color' + myInfo.color, myInfo.id); // add the new head to the DOM
 		
 			snake.unshift(newHeadOfSnake); // add the new head to the front of the snake array
 		
@@ -228,7 +229,7 @@ $(function() {
 			} else {
 				// if they didn't eat food remove the tail to keep the snake the same length. If they did eat food keep the tail so the snake grows by one segment
 				
-				unColorCell(oldTailOfSnake.x, oldTailOfSnake.y, 'snake', null); // remove the old snake tail from the dom
+				unColorCell(oldTailOfSnake.x, oldTailOfSnake.y, 'snake color*', null); // remove the old snake tail from the dom
 
 				snake.pop(); // remove the tail from the snake Array
 			}		
@@ -236,7 +237,8 @@ $(function() {
 			var snakeInfo = {
 				newHead: newHeadOfSnake,
 				oldTail: oldTailOfSnake,
-				ate: ateFood
+				ate: ateFood,
+				color: myInfo.color
 			};
 			
 			socket.emit('snake moved', snakeInfo);
@@ -324,7 +326,7 @@ $(function() {
 				
 				snake.push(newSegment);
 				
-				colorCell(newSegment.x, newSegment.y, 'snake', myInfo.id);
+				colorCell(newSegment.x, newSegment.y, 'snake color' + myInfo.color, myInfo.id);
 
 				newSegmentX = newSegment.x;
 				newSegmentY = newSegment.y;
@@ -350,13 +352,9 @@ $(function() {
 			}
 			
 			socket.emit('new player', playerName);
-
-			myInfo.playerName = playerName;
 			
 			$('#startGamePop').hide();
-			
-			startNewGame();
-			
+						
 			return false;
 		});
 		
@@ -369,43 +367,47 @@ $(function() {
 		});
 		
 		//receive my snakeID after I load the page
-		socket.on('new snake ID', function(snakeID) {
-			if (!exists(snakeID)) {
+		socket.on('new player info', function(playerInfo) {
+			if (!exists(playerInfo)) {
 				return false;
 			}
+						
+			myInfo = playerInfo;
 			
-			myInfo.id = snakeID;
+			startNewGame();
 		});
 
 		// other snake socket listeners
 		socket.on('new snake', function(snakeInfo) {
-			if (!exists(snakeInfo) || !exists(snakeInfo.snakeID) || !exists(snakeInfo.snake)) {
+			if (!exists(snakeInfo) || !exists(snakeInfo.snakeID) || !exists(snakeInfo.snake) || !exists(snakeInfo.color)) {
 				return false;
 			}
 			
 			var snakeID = snakeInfo.snakeID;
 			var snake = snakeInfo.snake;
+			var color = snakeInfo.color;
 	
 			for (var i=0; i<snake.length; i++) {
-				colorCell(snake[i].x, snake[i].y, 'snake otherSnake', snakeID)
+				colorCell(snake[i].x, snake[i].y, 'snake color' + color, snakeID)
 			}
 		});
 
 		socket.on('snake moved', function(snakeInfo) {
 
-			if (!exists(snakeInfo) || !exists(snakeInfo.newHead) || !exists(snakeInfo.oldTail) || !exists(snakeInfo.ate)) {
+			if (!exists(snakeInfo) || !exists(snakeInfo.newHead) || !exists(snakeInfo.oldTail) || !exists(snakeInfo.ate) || !exists(snakeInfo.color)) {
 				return false;
 			}
 			
 			var newHead = snakeInfo.newHead;
 			var oldTail = snakeInfo.oldTail;
+			var color = snakeInfo.color;
 					
-			colorCell(newHead.x, newHead.y, 'snake otherSnake', snakeInfo.snakeID); // add the new head
+			colorCell(newHead.x, newHead.y, 'snake color' + color, snakeInfo.snakeID); // add the new head
 			
 			if (snakeInfo.ate) {
 				foodEaten(newHead);
 			} else {
-				unColorCell(oldTail.x, oldTail.y, 'snake otherSnake', null); // remove the old tail
+				unColorCell(oldTail.x, oldTail.y, 'snake color*', null); // remove the old tail
 			}
 		
 		});
@@ -415,10 +417,10 @@ $(function() {
 		});
 	
 		socket.on('update scoreboard', function(scores) {
-			if (!exists(scores)) {
+			if (!exists(scores) || !scores.length) {
 				return false;
 			}
-			
+						
 			scores.sort(function(a, b){
 				return b.score - a.score;
 			});
@@ -431,7 +433,7 @@ $(function() {
 			
 			$('#scoreBoard .sbScore').remove();
 			for (var i = 0; i < scores.length; i++) {
-				$('<li />').text(scores[i].playerName + ' - ' + scores[i].score).addClass('sbScore').appendTo('#scoreBoard #Scorers');
+				$('<li />').addClass('color' + scores[i].color).text(scores[i].playerName + ' - ' + scores[i].score).addClass('sbScore').appendTo('#scoreBoard #Scorers');
 			}
 		});
 		
@@ -471,9 +473,15 @@ $(function() {
 		return cell;
 	}
 	function unColorCell(x, y, theClass, snakeID) {
+		if (theClass.indexOf('color*') > -1) {
+			for (var i = 0; i < numOfColors; i++) {
+				theClass += ' color' + i;
+			}	
+		}
+		
 		var cell = $('.row').eq(y).find('.cell').eq(x).removeClass(theClass);
 		
-		if (exists(snakeID)) {
+		if (typeof snakeID !== 'undefined') {
 			cell.attr('data-snakeID',snakeID);
 		}
 		

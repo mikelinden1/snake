@@ -9,7 +9,7 @@ $darkBlueColor: #004475;
 * {
 	font-family:'Acme',sans-serif;
 }
-
+			
 #gameTitle {
 	text-align:center;
 	font-size:50px;
@@ -71,6 +71,54 @@ $darkBlueColor: #004475;
 				&.otherSnake {
 					background-color:$otherSnakeColor;
 				}
+				
+				//snake colors
+				&.color0 {
+					background-color:#4a3836; // espresso
+				}
+				&.color1 {
+					background-color:#b14835; //brick red
+				}
+				&.color2 {
+					background-color:#7c0032; // cabernet red
+				}
+				&.color3 {
+					background-color:#4c1661; // indigo
+				}
+				&.color4 {
+					background-color:#002e5a; // navy
+				}
+				&.color5 {
+					background-color:#1e66b2; // french blue
+				}
+				&.color6 {
+					background-color:#56bcc1; // turquoise
+				}
+				&.color7 {
+					background-color:#f0a7b2; // rose
+				}
+				&.color8 {
+					background-color:#6d9346; // tree top green
+				}
+				&.color9 {
+					background-color:#01654d; // emerald green
+				}
+				&.color10 {
+					background-color:#ed008c; // magenta
+				}
+				&.color11 {
+					background-color:#ed1b24; // fire engine red
+				}
+				&.color12 {
+					background-color:#f5864f; // Papaya orange
+				}
+				&.color13 {
+					background-color:#fdaf17; // clementine orange
+				}
+				&.color14 {
+					background-color:#a2b5a1; // sage green
+				}
+				
 			}
 		}
 	}
@@ -91,17 +139,17 @@ $darkBlueColor: #004475;
 		
 		.noPlayers {
 			font-size:22px;
-			color:$midBlueColor;
+			color:$lightBlueColor;
 			text-align:center;
 		}
 		
 		.sbScore {
 			font-size:22px;
-			color:$midBlueColor;	
+//			color:$midBlueColor;	
 			
 			&:first-child {
-				color:$lightBlueColor;
-				font-size:24px;
+//				color:$lightBlueColor;
+				font-size:26px;
 			}		
 		}
 	}
@@ -118,12 +166,6 @@ $darkBlueColor: #004475;
 	font-size:20px;
 	font-weight:400;
 	text-align:center;
-	
-	.message {
-		.playerName {
-			color:$lightBlueColor;
-		}
-	}
 }
 
 
@@ -187,4 +229,50 @@ $darkBlueColor: #004475;
 		}
 	}
 			
+}
+
+.color0 {
+	color:#4a3836; // espresso
+}
+.color1 {
+	color:#b14835; //brick red
+}
+.color2 {
+	color:#7c0032; // cabernet red
+}
+.color3 {
+	color:#4c1661; // indigo
+}
+.color4 {
+	color:#002e5a; // navy
+}
+.color5 {
+	color:#1e66b2; // french blue
+}
+.color6 {
+	color:#56bcc1; // turquoise
+}
+.color7 {
+	color:#f0a7b2; // chive green
+}
+.color8 {
+	color:#6d9346; // tree top green
+}
+.color9 {
+	color:#01654d; // emerald green
+}
+.color10 {
+	color:#ed008c; // magenta
+}
+.color11 {
+	color:#ed1b24; // fire engine red
+}
+.color12 {
+	color:#f5864f; // Papaya orange
+}
+.color13 {
+	color:#fdaf17; // clementine orange
+}
+.color14 {
+	color:#a2b5a1; // sage green
 }
