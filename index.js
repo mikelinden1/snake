@@ -11,6 +11,13 @@ app.get('/', function(req, res) {
   res.sendFile(__dirname + '/game/snake.html');
 });
 
+var redis = require('redis');
+var redisClient = redis.createClient(); //creates a new client
+
+redisClient.on('connect', function() {
+    console.log('connected');
+});
+
 var columns = 50;
 var rows = 50;	
 var numOfFoodPieces = 8;
