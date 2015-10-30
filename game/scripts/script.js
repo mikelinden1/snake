@@ -472,11 +472,19 @@ $(function() {
 		
 		return cell;
 	}
+	
+	var colorClasses;
+	
 	function unColorCell(x, y, theClass, snakeID) {
 		if (theClass.indexOf('color*') > -1) {
-			for (var i = 0; i < numOfColors; i++) {
-				theClass += ' color' + i;
-			}	
+			if (!exists(colorClasses)) {
+				colorClasses = "";
+				for (var i = 0; i < numOfColors; i++) {
+					colorClasses += ' color' + i;
+				}
+			}
+			
+			theClass = theClass.replace(' color*','') + colorClasses;
 		}
 		
 		var cell = $('.row').eq(y).find('.cell').eq(x).removeClass(theClass);
