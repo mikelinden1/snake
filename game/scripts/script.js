@@ -302,7 +302,6 @@ $(function() {
 			nextDirection = newRandomNumber(0, 3);
 			
 			var generateSnake = function() {
-				console.log("generate snake");
 				// pick a random coordinate to start from
 				var snakeStartingPointX = newRandomNumber(10, columns-11);
 				var snakeStartingPointY = newRandomNumber(10, rows-11);
@@ -526,7 +525,6 @@ $(function() {
 		});
 		
 		socket.on('update leaderboard', function(leaderboard) {
-			console.log("leaderboard",leaderboard);
 			if (!exists(leaderboard) || !leaderboard.length) {
 				return false;
 			}

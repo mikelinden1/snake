@@ -220,15 +220,13 @@ io.on('connection', function(socket) {
     var oldScore = player.score;
     player.score = 0;
     
-    if (oldScore > 0) {
-			updateScore();
-			
+    if (oldScore > 0) {			
 			if (leaderboard.length < leaderboardMaxLen || leaderboard[leaderboard.length - 1].score < oldScore) {
 				addToLeaderBoard({ 'name': player.playerName, 'score': oldScore });
 			}
 		}
 		
-		io.sockets.emit('update player score', player);
+		io.sockets.emit('update player score', players[socket.id]);
 		sendMessage('<span class="playerName color' + player.color + '">' + player.playerName + '</span> has died!');	
   });
   
