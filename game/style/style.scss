@@ -123,9 +123,7 @@ $darkBlueColor: #004475;
 		}
 	}
 	
-	#rightSide {
-	//	float:right;
-		
+	#rightSide {		
 		background-color:$darkBlueColor;
 		width:200px;
 		height:464px;
@@ -144,14 +142,14 @@ $darkBlueColor: #004475;
 			font-size:22px;
 			color:$lightBlueColor;
 			text-align:center;
+			
+			margin-bottom:15px;
 		}
 		
 		.sbScore {
 			font-size:22px;
-//			color:$midBlueColor;	
 			
 			&:first-child {
-//				color:$lightBlueColor;
 				font-size:26px;
 			}		
 		}
