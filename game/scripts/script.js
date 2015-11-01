@@ -51,7 +51,7 @@ $(function() {
 				var food = { x: newRandomNumber(0, columns - 1), y: newRandomNumber(0, rows - 1) };
 				
 				// check if the new food is overlapping a snake or other food
-				var badPlace = checkCollison(food, foodOnBoard) && !$('.row').eq(food.y).find('.cell').eq(food.x).hasClass('snake');
+				var badPlace = checkCollison(food, foodOnBoard) || $('.row').eq(food.y).find('.cell').eq(food.x).hasClass('snake');
 				
 				if (!badPlace) {
 					colorCell(food.x, food.y, 'food');
@@ -301,49 +301,61 @@ $(function() {
 			// pick a new random direction
 			nextDirection = newRandomNumber(0, 3);
 			
-			// pick a random coordinate to start from
-			var snakeStartingPointX = newRandomNumber(10, columns-11);
-			var snakeStartingPointY = newRandomNumber(10, rows-11);
-			
-			var lastSegment = {x: snakeStartingPointX, y: snakeStartingPointY};
-						
-			for (var s = 0; s < initSnakeLength; s++) {
+			var generateSnake = function() {
+				console.log("generate snake");
+				// pick a random coordinate to start from
+				var snakeStartingPointX = newRandomNumber(10, columns-11);
+				var snakeStartingPointY = newRandomNumber(10, rows-11);
 				
-				var newSegmentX = lastSegment.x;
-				var newSegmentY = lastSegment.y;
-				var newSegment = { x: newSegmentX, y: newSegmentY };
+				var lastSegment = {x: snakeStartingPointX, y: snakeStartingPointY};
+							
+				for (var s = 0; s < initSnakeLength; s++) {
+					
+					var newSegmentX = lastSegment.x;
+					var newSegmentY = lastSegment.y;
+					var newSegment = { x: newSegmentX, y: newSegmentY };
+		
+					switch(nextDirection) {
+						case 0:
+							//up
+							newSegment.y += 1;
+							break;
+						case 1:
+							//right
+							newSegment.x -= 1;
+							break;
+						case 2:
+							//down
+							newSegment.y -= 1;
+							break;
+						case 3:
+							//left
+							newSegment.x += 1;
+							break;
+					}
+					
+					var badPlace = checkCollison(newSegment, foodOnBoard) || $('.row').eq(newSegment.y).find('.cell').eq(newSegment.x).hasClass('snake');
+					
+					if (badPlace) {
+						generateSnake();
+						return false;	
+					}
+					
+					snake.push(newSegment);
+					
+					colorCell(newSegment.x, newSegment.y, 'snake color' + myInfo.color, myInfo.id);
 	
-				switch(nextDirection) {
-					case 0:
-						//up
-						newSegment.y += 1;
-						break;
-					case 1:
-						//right
-						newSegment.x -= 1;
-						break;
-					case 2:
-						//down
-						newSegment.y -= 1;
-						break;
-					case 3:
-						//left
-						newSegment.x += 1;
-						break;
-				}
+					newSegmentX = newSegment.x;
+					newSegmentY = newSegment.y;
+					lastSegment = { x: newSegmentX, y: newSegmentY };
+				};
 				
-				snake.push(newSegment);
+				socket.emit('new snake', snake); // tell everyone about my new snake
 				
-				colorCell(newSegment.x, newSegment.y, 'snake color' + myInfo.color, myInfo.id);
-
-				newSegmentX = newSegment.x;
-				newSegmentY = newSegment.y;
-				lastSegment = { x: newSegmentX, y: newSegmentY };
+				moveSnake(); // start the animation loop
 			}
 			
-			socket.emit('new snake', snake); // tell everyone about my new snake
-			
-			moveSnake(); // start the animation loop
+			generateSnake();
 		};
 				
 		$('#joinGameForm').submit(function() {
@@ -421,28 +433,67 @@ $(function() {
 		});
 
 		socket.on('snake died', function(snakeID) {
+			if (!exists(snakeID)) {
+				return false;
+			}
+			
 			removeSnake(snakeID);
 		});
 	
-		socket.on('update scoreboard', function(scores) {
-			if (!exists(scores) || !scores.length) {
-				return false;
-			}
+		var sortScoreboard = function() {
+			var scorers = $('#Scoreboard #Scorers');
+			var scores = scorers.children('.sbScore');
 						
-			scores.sort(function(a, b){
-				return b.score - a.score;
+			scores.sort(function(a,b) {
+				var an = a.getAttribute('data-score');
+				var bn = b.getAttribute('data-score');
+				
+				if (an > bn) {
+					return -1;
+				}
+				
+				if (an < bn) {
+					return 1;
+				}
+				
+				return 0;
 			});
 			
-			if (scores.length) {
-				$('.noPlayers').hide();
-			} else {
-				$('.noPlayers').show();
+			scores.detach().appendTo(scorers);	
+		};
+		
+		socket.on('new player', function(playerInfo) {
+			if (!exists(playerInfo)) {
+				return false;
 			}
 			
-			$('#Scoreboard .sbScore').remove();
-			for (var i = 0; i < scores.length; i++) {
-				$('<li />').addClass('color' + scores[i].color).text(scores[i].playerName + ' - ' + scores[i].score).addClass('sbScore').appendTo('#Scoreboard #Scorers');
+			$('.noPlayers').hide();
+			
+			$('<li />').addClass('color' + playerInfo.color).attr({ 'data-playerID': playerInfo.id, 'data-score': 0 }).html(playerInfo.playerName + ' - <span class="theScore">' + playerInfo.score + '</span>').addClass('sbScore').appendTo('#Scoreboard #Scorers');
+		});
+		
+		socket.on('remove player', function(playerInfo) {
+			if (!exists(playerInfo)) {
+				return false;
 			}
+			
+			$('#Scoreboard .sbScore[data-playerID=' + playerInfo.id + ']').remove();
+
+			if (!$('#Scoreboard .sbScore').length) {
+				$('.noPlayers').show();
+			}	else {
+				sortScoreboard();
+			}
+		});
+		
+		socket.on('update player score', function(playerInfo) {
+			if (!exists(playerInfo)) {
+				return false;
+			}
+			
+			$('#Scoreboard .sbScore[data-playerID=' + playerInfo.id + ']').attr('data-score',playerInfo.score).find('.theScore').text(playerInfo.score);
+			
+			sortScoreboard();			
 		});
 		
 		socket.on('update leaderboard', function(leaderboard) {

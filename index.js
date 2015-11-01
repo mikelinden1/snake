@@ -27,8 +27,6 @@ var numOfColors = 15;
 var leaderboard = [];
 var leaderboardMaxLen = 10;
 
-updateLeaderBoard();
-
 var spawnFood = function(numOfPieces) {
 
 	var newFood = function() {
@@ -42,12 +40,23 @@ var spawnFood = function(numOfPieces) {
 	}
 }(numOfFoodPieces);
 
+var loadLeaderBoard = function() {
+	leaderboardCollection.find({}, {}, function(error, response) {
+		leaderboard = response;
+		
+		leaderboard.sort(function(a, b){
+			return b.score - a.score;
+		});
+	});
+}();
+
 io.on('connection', function(socket) {
 	if (exists(io.sockets.connected[socket.id])) {
 		// send the food to the new player
 		io.sockets.connected[socket.id].emit('food delivery', foodOnBoard);
 		io.sockets.connected[socket.id].emit('update leaderboard', leaderboard);
-		updateScore();
+
+		updateScore(socket.id);
 	}
 	
   socket.on('disconnect', function() { 
@@ -56,10 +65,14 @@ io.on('connection', function(socket) {
 			
 			delete usedColors[players[socket.id].color];
 		}
-		
-    delete players[socket.id];
+
+		io.sockets.emit('remove player', players[socket.id]);
     
-    updateScore();
+    delete players[socket.id];
+
+//    updateScore();
+  
+    socket.broadcast.emit('snake died', socket.id);
   });
   
   var newSnakeColor = function(snakeID) {	
@@ -121,8 +134,8 @@ io.on('connection', function(socket) {
 			io.sockets.connected[socket.id].emit('new player info', newPlayer);
 		}
 		
-		updateScore();
-			
+//		updateScore();
+		io.sockets.emit('new player', newPlayer);
   });
   
   socket.on('food added', function(food) {
@@ -187,8 +200,9 @@ io.on('connection', function(socket) {
 			}
 			
 			players[socket.id].score++;
-			updateScore();
 			
+			io.sockets.emit('update player score', players[socket.id]);
+			//updateScore();
 		}
 				
     socket.broadcast.emit('snake moved', snakeInfo);
@@ -219,18 +233,23 @@ io.on('connection', function(socket) {
 			}
 		}
 		
+		io.sockets.emit('update player score', player);
 		sendMessage('<span class="playerName color' + player.color + '">' + player.playerName + '</span> has died!');	
   });
   
-  function updateScore() {
+  function updateScore(socketID) {
 	  var scores = [];
 	  for (var property in players) {
 	    if (players.hasOwnProperty(property)) {
 	      scores.push(players[property]);
 	    }
 		}
-
-	  io.sockets.emit('update scoreboard', scores);
+		
+		if (!exists(socketID)) {
+	  	io.sockets.emit('update scoreboard', scores);
+	  } else {
+		  io.sockets.connected[socketID].emit('update scoreboard', scores);
+	  }
   }
   
   function sendMessage(message) {
@@ -240,34 +259,27 @@ io.on('connection', function(socket) {
   function addToLeaderBoard(scoreInfo) {
 	  leaderboardCollection.insert(scoreInfo, function (error, response) {
 		  if (error) {
-		    console.log("There was a problem adding the information to the database.");
+			    console.log("There was a problem adding the information to the database.");
 		    return false;
 		  } else {
-		    updateLeaderBoard();
+			  leaderboard.push(scoreInfo);
+			  
+			  leaderboard.sort(function(a, b){
+					return b.score - a.score;
+				});
+						
+				if (leaderboard.length > leaderboardMaxLen) {
+					// remove lowest score	
+					leaderboardCollection.remove(leaderboard[leaderboard.length - 1]);
+					leaderboard.pop();
+				}
+			  
+				io.sockets.emit('update leaderboard', leaderboard);
 		  }
 		});
   }
   
 });
-
-function updateLeaderBoard() {
-	leaderboardCollection.find({}, {}, function(error, response) {
-		leaderboard = response;
-		
-		leaderboard.sort(function(a, b){
-			return b.score - a.score;
-		});
-				
-		if (leaderboard.length > leaderboardMaxLen) {
-			// remove lowest score	
-			leaderboardCollection.remove(leaderboard[leaderboard.length - 1]);
-			leaderboard.pop();
-		}
-				
-		io.sockets.emit('update leaderboard', leaderboard);
-	});
-}
-
 
 http.listen(app.get('port'), function() {
   console.log('listening on *:' + app.get('port'));
