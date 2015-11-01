@@ -55,8 +55,7 @@ io.on('connection', function(socket) {
 		// send the food to the new player
 		io.sockets.connected[socket.id].emit('food delivery', foodOnBoard);
 		io.sockets.connected[socket.id].emit('update leaderboard', leaderboard);
-
-		updateScore(socket.id);
+		io.sockets.connected[socket.id].emit('update scoreboard', players);
 	}
 	
   socket.on('disconnect', function() { 
@@ -69,8 +68,6 @@ io.on('connection', function(socket) {
 		io.sockets.emit('remove player', players[socket.id]);
     
     delete players[socket.id];
-
-//    updateScore();
   
     socket.broadcast.emit('snake died', socket.id);
   });
@@ -134,7 +131,6 @@ io.on('connection', function(socket) {
 			io.sockets.connected[socket.id].emit('new player info', newPlayer);
 		}
 		
-//		updateScore();
 		io.sockets.emit('new player', newPlayer);
   });
   
@@ -202,7 +198,6 @@ io.on('connection', function(socket) {
 			players[socket.id].score++;
 			
 			io.sockets.emit('update player score', players[socket.id]);
-			//updateScore();
 		}
 				
     socket.broadcast.emit('snake moved', snakeInfo);
@@ -236,21 +231,6 @@ io.on('connection', function(socket) {
 		io.sockets.emit('update player score', player);
 		sendMessage('<span class="playerName color' + player.color + '">' + player.playerName + '</span> has died!');	
   });
-  
-  function updateScore(socketID) {
-	  var scores = [];
-	  for (var property in players) {
-	    if (players.hasOwnProperty(property)) {
-	      scores.push(players[property]);
-	    }
-		}
-		
-		if (!exists(socketID)) {
-	  	io.sockets.emit('update scoreboard', scores);
-	  } else {
-		  io.sockets.connected[socketID].emit('update scoreboard', scores);
-	  }
-  }
   
   function sendMessage(message) {
 	  io.sockets.emit('new message', message);

@@ -462,6 +462,35 @@ $(function() {
 			scores.detach().appendTo(scorers);	
 		};
 		
+		var addPlayer = function(player) {
+			$('<li />').addClass('color' + player.color).attr({ 'data-playerID': player.id, 'data-score': 0 }).html(player.playerName + ' - <span class="theScore">' + player.score + '</span>').addClass('sbScore').appendTo('#Scoreboard #Scorers');
+		};
+		
+		socket.on('update scoreboard', function(players) {
+			if (!exists(players)) {
+				return false;
+			}
+			
+			var scores = [];
+			for (var property in players) {
+				if (players.hasOwnProperty(property)) {
+				  scores.push(players[property]);
+				}
+			}
+			
+			scores.sort(function(a, b){
+				return b.score - a.score;
+			});
+
+			if (scores.length) {
+				$('.noPlayers').hide();
+				
+				for (var i = 0; i < scores.length; i++) {
+					addPlayer(scores[i]);
+				}
+			}
+		});
+		
 		socket.on('new player', function(playerInfo) {
 			if (!exists(playerInfo)) {
 				return false;
@@ -469,7 +498,7 @@ $(function() {
 			
 			$('.noPlayers').hide();
 			
-			$('<li />').addClass('color' + playerInfo.color).attr({ 'data-playerID': playerInfo.id, 'data-score': 0 }).html(playerInfo.playerName + ' - <span class="theScore">' + playerInfo.score + '</span>').addClass('sbScore').appendTo('#Scoreboard #Scorers');
+			addPlayer(playerInfo);
 		});
 		
 		socket.on('remove player', function(playerInfo) {
