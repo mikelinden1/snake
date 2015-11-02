@@ -358,7 +358,11 @@ $(function() {
 		$('#joinGameForm').submit(function() {
 			var playerName = $('.playerName').val();
 			var level = $('#startGamePop .level').val();
-
+			
+			if (level < 50) {
+				level = 50;
+			}
+			
 			gameDelay = level;
 			
 			if (playerName === '') {
@@ -377,6 +381,11 @@ $(function() {
 		
 		$('.newGameBtn').click(function() {
 			var level = $('#gameOverPop .level').val();
+			
+			if (level < 50) {
+				level = 50;
+			}
+			
 			gameDelay = level;
 			
 			$('#gameOverPop').hide();
