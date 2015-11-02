@@ -31,7 +31,7 @@ $(function() {
 		
 	}
 	
-	var colorClasses = "";
+	var colorClasses = '';
 		
 	// generate a string of all the color classes
 	for (var i = 0; i < numOfColors; i++) {
@@ -347,12 +347,12 @@ $(function() {
 					newSegmentX = newSegment.x;
 					newSegmentY = newSegment.y;
 					lastSegment = { x: newSegmentX, y: newSegmentY };
-				};
+				}
 				
 				socket.emit('new snake', snake); // tell everyone about my new snake
 				
 				moveSnake(); // start the animation loop
-			}
+			};
 			
 			generateSnake();
 		};
@@ -407,7 +407,7 @@ $(function() {
 			var color = snakeInfo.color;
 	
 			for (var i=0; i<snake.length; i++) {
-				colorCell(snake[i].x, snake[i].y, 'snake color' + color, snakeID)
+				colorCell(snake[i].x, snake[i].y, 'snake color' + color, snakeID);
 			}
 		});
 
@@ -473,7 +473,7 @@ $(function() {
 			var scores = [];
 			for (var property in players) {
 				if (players.hasOwnProperty(property)) {
-				  scores.push(players[property]);
+					scores.push(players[property]);
 				}
 			}
 			
