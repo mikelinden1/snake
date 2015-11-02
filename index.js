@@ -29,12 +29,13 @@ var leaderboard = [];
 var leaderboardMaxLen = 10;
 
 // spawn 8 food pieces when the server starts
-var spawnFood = function(numOfPieces) {
-
+var initFood = function(numOfPieces) {
+	if (!exists(numOfPieces)) {
+		return false;
+	}
+	
 	var newFood = function() {
-		
 		var food = { x: newRandomNumber(0, columns - 1), y: newRandomNumber(0, rows - 1) };		
-		
 		var badPlace = checkCollison(food, foodOnBoard);
 
 		if (!badPlace) {
@@ -73,23 +74,22 @@ io.on('connection', function(socket) {
 	}
 	
   socket.on('disconnect', function() {
-	  
 		if (exists(players[socket.id])) {
 			sendMessage('<span class="playerName color' + players[socket.id].color + '">' + players[socket.id].playerName + '</span> has left the game!');
 			
 			delete usedColors[players[socket.id].color];
+			
+			// remove the player from the scoreboard
+			io.sockets.emit('remove player', players[socket.id]);
+	    
+	    delete players[socket.id];
 		}
-
-		// remove the player from the scoreboard
-		io.sockets.emit('remove player', players[socket.id]);
-    
-    delete players[socket.id];
-  
+		  
     socket.broadcast.emit('snake died', socket.id);
   });
   
   var newSnakeColor = function(snakeID) {	
-		// choose a new snake color that isn't being used
+		// choose a new snake color that isn't already being used
 		var outOfColors = true;
 		
 		if (usedColors.length < numOfColors) {
@@ -231,12 +231,12 @@ io.on('connection', function(socket) {
 			players[socket.id] = player;
 		}
   
-    var oldScore = player.score;
+    var newScore = player.score;
     player.score = 0;
     
-    if (oldScore > 0) {			
-			if (leaderboard.length < leaderboardMaxLen || leaderboard[leaderboard.length - 1].score < oldScore) {
-				addToLeaderBoard({ 'name': player.playerName, 'score': oldScore });
+    if (newScore > 0) {			
+			if (leaderboard.length < leaderboardMaxLen || leaderboard[leaderboard.length - 1].score < newScore) {
+				addToLeaderBoard({ 'name': player.playerName, 'score': newScore });
 			}
 		}
 		
@@ -249,7 +249,7 @@ io.on('connection', function(socket) {
   }
   
   function addToLeaderBoard(scoreInfo) {
-		leaderboardCollection.insert(scoreInfo, function (error, response) {
+		leaderboardCollection.insert(scoreInfo, function(error, response) {
 			if (error) {
 				console.log("There was a problem adding the information to the database.");
 				return false;

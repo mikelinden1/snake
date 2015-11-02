@@ -41,7 +41,6 @@ $(function() {
 	var gameLogic = function() {
 		
 		var spawnFood = function(numOfPieces) {
-			
 			if (!exists(numOfPieces)) {
 				numOfPieces = 1;
 			}
@@ -82,7 +81,6 @@ $(function() {
 					break;
 				}
 			}
-			
 		};
 		
 		// receive new food package from server (only happens when you load the page)
@@ -212,7 +210,7 @@ $(function() {
 					$('#gameOverPop .highScore').hide();
 				}
 				
-				$('.cell.snake[data-snakeID=' + myInfo.id + ']').removeClass('snake').addClass('deadSnake'); // leave my snake on the board but make it red
+				$('.cell.snake[data-snakeID=' + myInfo.id + ']').removeClass('snake ' + colorClasses).addClass('deadSnake'); // leave my snake on the board but make it red
 				
 				$('#gameOverPop .level').val(gameDelay);
 				$('#gameOverPop').show();
