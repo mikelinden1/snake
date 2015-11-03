@@ -23,6 +23,7 @@ var rows = 50;
 var numOfFoodPieces = 8;
 var players = {};
 var foodOnBoard = [];
+var portalOnBoard = [];
 var usedColors = [];
 var numOfColors = 15;
 var leaderboard = [];
@@ -36,7 +37,7 @@ var initFood = function(numOfPieces) {
 	
 	var newFood = function() {
 		var food = { x: newRandomNumber(0, columns - 1), y: newRandomNumber(0, rows - 1) };		
-		var badPlace = checkCollison(food, foodOnBoard);
+		var badPlace = checkCollison(food, foodOnBoard) || checkCollison(food, portalOnBoard);
 
 		if (!badPlace) {
 			foodOnBoard.push(food);
@@ -50,17 +51,34 @@ var initFood = function(numOfPieces) {
 	}
 }(numOfFoodPieces);
 
+var initPortals = function(numOfPieces) {
+	portalOnBoard = [];
+	
+	var newPortal = function() {
+		var portal = { x: newRandomNumber(0, columns - 1), y: newRandomNumber(0, rows - 1) };		
+		var badPlace = checkCollison(portal, foodOnBoard) || checkCollison(portal, portalOnBoard);
+
+		if (!badPlace) {
+			portalOnBoard.push(portal);
+		} else {
+			newPortal();
+		}
+	};
+	
+	for (var i = 0; i < numOfPieces; i++) {
+		newPortal();
+	}
+};
+
+initPortals(2);
+
 // load the leadboard when the server starts and store it in the "leaderboard" array
 var loadLeaderBoard = function() {
-	leaderboardCollection.find({}, {}, function(error, response) {
+	leaderboardCollection.find({ $query: {}, $orderby: { score : -1 } }, function(error, response) {
 		if (error) {
 			console.log('Error loading leaderboard');
 		} else {
 			leaderboard = response;
-			
-			leaderboard.sort(function(a, b){
-				return b.score - a.score;
-			});
 		}
 	});
 }();
@@ -69,6 +87,7 @@ io.on('connection', function(socket) {
 	if (exists(io.sockets.connected[socket.id])) {
 		// send the food, leaderboard, and scoreboard to the new player
 		io.sockets.connected[socket.id].emit('food delivery', foodOnBoard);
+		io.sockets.connected[socket.id].emit('portal delivery', portalOnBoard);
 		io.sockets.connected[socket.id].emit('update leaderboard', leaderboard);
 		io.sockets.connected[socket.id].emit('update scoreboard', players);
 	}
@@ -149,6 +168,12 @@ io.on('connection', function(socket) {
 		
 		// add the new player to the scoreboard
 		io.sockets.emit('new player', newPlayer);
+  });
+  
+  socket.on('create portals', function() {
+	  initPortals(2);
+	  
+	  io.sockets.emit('portal delivery', portalOnBoard);
   });
   
   socket.on('food added', function(food) {
@@ -280,6 +305,7 @@ http.listen(app.get('port'), function() {
 function newRandomNumber(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
 function exists(a) {
 	if (typeof a === 'boolean') { // if boolean return true to avoid false negatives
 		return true;
@@ -287,6 +313,7 @@ function exists(a) {
 		return a && typeof a !== 'undefined';
 	}
 }
+
 function checkCollison(needle, haystack) {
 	for (var i = 0; i < haystack.length; i++) {
 		if (needle.x === haystack[i].x && needle.y === haystack[i].y) {

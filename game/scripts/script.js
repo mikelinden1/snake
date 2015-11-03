@@ -8,6 +8,7 @@ $(function() {
 	var rows = 50;
 	var numOfColors = 15;
 	var foodOnBoard = [];
+	var portalOnBoard = [];
 	var initSnakeLength = 3;
 	var snake = [];
 	var direction = null;
@@ -94,6 +95,19 @@ $(function() {
 
 			for (var i = 0; i < foodOnBoard.length; i++) {
 				colorCell(foodOnBoard[i].x, foodOnBoard[i].y, 'food');
+			}
+		});
+		
+		socket.on('portal delivery', function(portalPackage) { 
+			if (!exists(portalPackage)) {
+				return false;
+			}
+			
+			$('.cell.portal').removeClass('portal'); // remove any leftover food
+			portalOnBoard = portalPackage;
+
+			for (var i = 0; i < portalOnBoard.length; i++) {
+				colorCell(portalOnBoard[i].x, portalOnBoard[i].y, 'portal');
 			}
 		});
 		
@@ -216,6 +230,35 @@ $(function() {
 				$('#gameOverPop').show();
 
 				return false; // end the game loop
+			}
+			
+			var hitPortal = checkCollison(newHeadOfSnake, portalOnBoard);
+			
+			console.log("hit a portal? ", hitPortal);
+			
+			if (hitPortal) {
+				var foundNext = false;
+				$(".cell.portal").each(function() {
+					var x = $(this).index();
+					var y = $(this).parent().index();
+					console.log("x", x, "y", y);
+					
+					if (x !== newHeadOfSnake.x && y !== newHeadOfSnake.y && !foundNext) {
+						newHeadOfSnake = {
+							x: x,
+							y: y
+						};
+						
+						console.log("new head", newHeadOfSnake);
+					
+						foundNext = true;
+					}
+				});
+				
+				$('.cell.portal').removeClass('portal');
+				portalOnBoard = [];
+				
+				socket.emit('create portals');
 			}
 			
 			colorCell(newHeadOfSnake.x, newHeadOfSnake.y, 'snake color' + myInfo.color, myInfo.id); // add the new head to the DOM

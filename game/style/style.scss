@@ -62,6 +62,10 @@ $darkBlueColor: #004475;
 				background-color:$deadSnakeColor;
 			}
 			
+			&.portal {
+				background-color:#00d9ff;
+			}
+			
 			&.snake {
 				border:1px solid $boardBGColor;
 				width:8px;
