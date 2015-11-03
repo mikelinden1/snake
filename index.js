@@ -14,6 +14,7 @@ app.get('/', function(req, res) {
 });
    
 // connect to the Mongo Database via Monk for storing the leaderboard
+
 var monk = require('monk');
 var db = monk('mongodb://snake:snakesnakesnake@apollo.modulusmongo.net:27017/anyN8edo');
 var leaderboardCollection = db.get('leaderboard');
