@@ -16,7 +16,7 @@ app.get('/', function(req, res) {
 // connect to the Mongo Database via Monk for storing the leaderboard
 
 var monk = require('monk');
-var db = monk('mongodb://snake:snakesnakesnake@apollo.modulusmongo.net:27017/anyN8edo');
+var db = monk('mongodb://snake:snakesnakesnake@ds161580.mlab.com:61580/heroku_8rt1mv7s');
 var leaderboardCollection = db.get('leaderboard');
 
 var columns = 50;
