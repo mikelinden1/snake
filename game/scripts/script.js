@@ -608,9 +608,11 @@ $(function() {
 			return a && typeof a !== 'undefined';
 		}
 	}
+	
 	function newRandomNumber(min, max) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
+	
 	function colorCell(x, y, theClass, snakeID) {
 		var cell = $('.row').eq(y).find('.cell').eq(x).addClass(theClass);
 		
@@ -636,6 +638,7 @@ $(function() {
 		
 		return cell;
 	}
+	
 	function checkCollison(needle, haystack) {
 		for (var i = 0; i < haystack.length; i++) {
 			if (needle.x === haystack[i].x && needle.y === haystack[i].y) {
@@ -645,24 +648,31 @@ $(function() {
 		
 		return false;
 	}
+	
 	function setCookie(cookieName, cookieValue, expDays) {
-    var d = new Date();
-    d.setTime(d.getTime() + (expDays*24*60*60*1000));
-    var expires = 'expires='+d.toUTCString();
-    document.cookie = cookieName + '=' + cookieValue + '; ' + expires;
+        var d = new Date();
+        d.setTime(d.getTime() + (expDays*24*60*60*1000));
+        
+        var expires = 'expires='+d.toUTCString();
+        document.cookie = cookieName + '=' + cookieValue + '; ' + expires;
 	}
+	
 	function getCookie(cookieName) {
-    var name = cookieName + '=';
-    var ca = document.cookie.split(';');
-    for(var i=0; i<ca.length; i++) {
-      var c = ca[i];
-			while (c.charAt(0) === ' ') {
-				c = c.substring(1);
-			}
-      if (c.indexOf(name) === 0) {
+        var name = cookieName + '=';
+        var ca = document.cookie.split(';');
+        
+        for(var i=0; i<ca.length; i++) {
+            var c = ca[i];
+            
+    		while (c.charAt(0) === ' ') {
+    			c = c.substring(1);
+    		}
+    		
+            if (c.indexOf(name) === 0) {
 				return c.substring(name.length, c.length);
 			}
-    }
-    return null;
+        }
+        
+        return null;
 	}
 });
