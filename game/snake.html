@@ -1,28 +1,28 @@
 <!doctype html>
 <html>
-	
+
 <head>
-	
+
   <title>Snake</title>
 
 	<meta name="viewport" content="width=device-width">
-	
+
 	<link href='https://fonts.googleapis.com/css?family=Acme' rel='stylesheet' type='text/css'>
 	<link href='style/style.css' rel='stylesheet' type='text/css'>
-	
+
 	<script type="text/javascript" src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 	<script type="text/javascript" src="scripts/script.min.js"></script>
-	
+
 </head>
 
 <body>
-	
-	<h1 ID="gameTitle">Snake</h1>
-	
-	<DIV ID="myScore">Score <span class="score">0</span></DIV>
-	
-	<DIV ID="gameOverPop" class="pop">
+
+	<h1 id="gameTitle">Snake</h1>
+
+	<div id="myScore">Score <span class="score">0</span></div>
+
+	<div id="gameOverPop" class="pop">
 		<h1>Game Over!</h1>
 		<h2>Score: <span class="score">0</span></h2>
 		<h3 class="highScore">High Score!</h3>
@@ -33,11 +33,11 @@
 				<option value="50">Expert</option>
 			</select>
 		<button class="newGameBtn">New Game</button>
-	</DIV>
-	
-	<DIV ID="startGamePop" class="pop">
+	</div>
+
+	<div id="startGamePop" class="pop">
 		<h1>Join the Game!</h1>
-		<form ID="joinGameForm" action="snake.html">
+		<form id="joinGameForm" action="snake.html">
 			<input type="text" class="playerName" name="playerName" placeholder="Enter Your Name" />
 			<select class="level" name="level">
 				<option value="300">Easy</option>
@@ -47,29 +47,29 @@
 			</select>
 			<button class="startGameBtn">Start Game</button>
 		</form>
-	</DIV>
-	
-	<DIV ID="Container">
-		
-		<DIV ID="board"></DIV>
-		
-		<DIV ID="rightSide">
-			<DIV ID="Scoreboard">
+	</div>
+
+	<div id="Container">
+
+		<div id="board"></div>
+
+		<div id="rightSide">
+			<div id="Scoreboard">
 				<h1>Score Board</h1>
-				<ol ID="Scorers"></ol>
-				<DIV class="noPlayers">No Players Yet :(</DIV>
-			</DIV>
-			
-			<DIV ID="Leaderboard">
+				<ol id="Scorers"></ol>
+				<div class="noPlayers">No Players Yet :(</div>
+			</div>
+
+			<div id="Leaderboard">
 				<h1>Leader Board</h1>
-				<ol ID="Scorers"></ol>
-			</DIV>
-		</DIV>
-		
-	</DIV>
-	
-	<DIV ID="Messages"></DIV>
-	
+				<ol id="Scorers"></ol>
+			</div>
+		</div>
+
+	</div>
+
+	<div id="Messages"></div>
+
 </body>
-	
+
 </html>
